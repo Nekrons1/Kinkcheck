@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Сравнение списков</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <span class="brand"><span class="lock">🔒</span>Сравнение списков</span>
+    <div class="top-actions">
+      <button class="btn ghost icon-btn" id="themeBtn" title="Сменить тему" aria-label="Сменить тему">◑</button>
+      <a class="btn ghost" href="index.html">← К анкете</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="intro">
+    <h1>Сравнить два списка</h1>
+    <p>Вставьте две ссылки (или коды из ссылок) — совпадения посчитаются прямо здесь, в браузере. <b style="color:var(--ink);font-weight:600">Ничего не отправляется и не сохраняется.</b> Правило простое: если хотя бы у одного стоит «Нет» — пункт исключается.</p>
+  </section>
+
+  <div class="cmp-inputs">
+    <div class="cmp-col">
+      <input class="cmp-name" id="nameA" placeholder="Имя / метка A (необязательно)" autocomplete="off">
+      <label>Ссылка или код A</label>
+      <textarea id="codeA" placeholder="Вставьте ссылку сюда…"></textarea>
+    </div>
+    <div class="cmp-col">
+      <input class="cmp-name" id="nameB" placeholder="Имя / метка B (необязательно)" autocomplete="off">
+      <label>Ссылка или код B</label>
+      <textarea id="codeB" placeholder="Вставьте ссылку сюда…"></textarea>
+    </div>
+  </div>
+
+  <button class="btn primary" id="cmpBtn" style="width:100%;padding:12px">Сравнить</button>
+
+  <div id="results"></div>
+
+  <footer class="foot">
+    Сравнение выполняется полностью в вашем браузере. Коды не сохраняются и никуда не уходят.
+  </footer>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="app-data.js"></script>
+<script>
+/* theme */
+const themeBtn=document.getElementById("themeBtn");
+try{ const saved=localStorage.getItem("checklist-theme"); if(saved) document.documentElement.dataset.theme=saved; }catch(e){}
+themeBtn.addEventListener("click",()=>{ const cur=document.documentElement.dataset.theme; const isDark=cur?cur==="dark":matchMedia("(prefers-color-scheme: dark)").matches; const next=isDark?"light":"dark"; document.documentElement.dataset.theme=next; try{localStorage.setItem("checklist-theme",next);}catch(e){} });
+
+let toastTimer=null; function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove("show"),2400);}
+const esc=s=>(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+const RU={love:"Обожаю",yes:"Да",maybe:"Может",limit:"Нет"};
+const BC={love:"b-match",yes:"b-good",maybe:"b-maybe",limit:"b-limit"};
+const POS={yes:1,love:1}, SOFT={maybe:1};
+
+function classify(a,b){
+  if(a==="limit"||b==="limit") return "excluded";
+  const pa=POS[a],pb=POS[b],sa=SOFT[a],sb=SOFT[b];
+  if(pa&&pb) return "match";
+  if((pa&&sb)||(sa&&pb)||(sa&&sb)) return "discuss";
+  if(pa||pb||sa||sb) return "one";
+  return null;
+}
+function badge(v){ return v ? '<span class="badge '+BC[v]+'">'+RU[v]+'</span>' : '<span class="badge b-one">—</span>'; }
+
+document.getElementById("cmpBtn").addEventListener("click",()=>{
+  const rawA=document.getElementById("codeA").value.trim();
+  const rawB=document.getElementById("codeB").value.trim();
+  if(!rawA||!rawB){ toast("Вставьте обе ссылки"); return; }
+  const A=decodeState(extractCode(rawA));
+  const B=decodeState(extractCode(rawB));
+  const nA=esc(document.getElementById("nameA").value.trim()||A.name||"Список A");
+  const nB=esc(document.getElementById("nameB").value.trim()||B.name||"Список B");
+  const groups={match:[],discuss:[],one:[],excluded:[]};
+  DATA.forEach(cat=>cat.items.forEach(it=>{
+    const a=(A.items[it.id]||{}).interest||null;
+    const b=(B.items[it.id]||{}).interest||null;
+    const g=classify(a,b); if(!g) return;
+    groups[g].push({it,a,b});
+  }));
+  render(groups,nA,nB);
+});
+
+function render(groups,nA,nB){
+  const meta=[
+    ["match","Совпадения — оба «за»","var(--love)","У вас обоих интерес. С этого стоит начать."],
+    ["discuss","Стоит обсудить","var(--maybe)","Кто-то «может», кто-то «да» — обсудите условия."],
+    ["one","Интересно одному","var(--chip-ink)","Один хочет — можно предложить и обсудить."],
+    ["excluded","Исключено — стоп","var(--limit)","Хотя бы у одного «Нет». Сюда не идём."],
+  ];
+  const box=document.getElementById("results");
+  const total=groups.match.length+groups.discuss.length+groups.one.length+groups.excluded.length;
+  if(!total){ box.innerHTML='<div class="result-group"><div class="sub">Пересечений не найдено. Проверьте, что вставлены оба кода целиком.</div></div>'; return; }
+  let html='<div class="cmp-summary">'
+    +'<div class="cmp-stat"><b style="color:var(--love)">'+groups.match.length+'</b>совпадений</div>'
+    +'<div class="cmp-stat"><b style="color:var(--maybe)">'+groups.discuss.length+'</b>обсудить</div>'
+    +'<div class="cmp-stat"><b style="color:var(--chip-ink)">'+groups.one.length+'</b>у одного</div>'
+    +'<div class="cmp-stat"><b style="color:var(--limit)">'+groups.excluded.length+'</b>исключено</div>'
+    +'</div>';
+  meta.forEach(([key,title,dot,desc])=>{
+    const rows=groups[key]; if(!rows.length) return;
+    html+='<div class="result-group"><h3><span class="dot" style="background:'+dot+'"></span>'+title+' <span style="font-weight:400;color:var(--muted);font-size:14px">('+rows.length+')</span></h3><div class="sub">'+desc+'</div>';
+    rows.forEach(({it,a,b})=>{
+      html+='<div class="rrow"><div class="nm">'+esc(it[0])+'<span class="en">'+esc(it[1])+'</span></div>'
+          +'<div class="who">'+nA+': '+badge(a)+' &nbsp; '+nB+': '+badge(b)+'</div></div>';
+    });
+    html+='</div>';
+  });
+  box.innerHTML=html;
+  box.scrollIntoView({behavior:"smooth",block:"start"});
+}
+</script>
+</body>
+</html>
