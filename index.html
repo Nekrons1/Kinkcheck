@@ -19,8 +19,9 @@
     <span class="brand"><span class="lock">🔒</span>Чек-лист практик</span>
     <div class="top-actions">
       <button class="btn ghost icon-btn" id="themeBtn" title="Сменить тему" aria-label="Сменить тему">◑</button>
-      <button class="btn primary" id="shareBtn" title="Ссылка и QR">Поделиться</button>
-      <button class="btn ghost" id="printBtn" title="Печать или сохранение через браузер">Печать / PDF</button>
+      <a class="btn primary" id="compareBtn" href="compare.html" title="Сравнить две анкеты">Сравнить анкеты</a>
+      <button class="btn ghost" id="savedBtn" title="Полученные анкеты">Полученные</button>
+      <button class="btn ghost" id="shareBtn" title="Ссылка и QR">Поделиться</button>
       <button class="btn ghost" id="pdfBtn">Скачать PDF</button>
       <button class="btn ghost" id="resetBtn" title="Очистить всё">Очистить</button>
     </div>
@@ -41,10 +42,11 @@
 <main class="wrap">
 
   <div class="banner" id="sharedBanner">
-    Вы открыли анкету по ссылке (свою или чужую). Правки <b>пока не сохраняются</b> в этот браузер — так вы не затрёте собственный список.
+    Вы открыли анкету по ссылке или QR. Она сохранена в «Полученные». Правки <b>пока не сохраняются</b> в этот браузер — так вы не затрёте собственный список.
     <div class="row">
-      <button class="btn" id="bannerKeep">Продолжить и сохранять как свою</button>
-      <button class="btn ghost" id="bannerOwn">Открыть чистую анкету</button>
+      <button class="btn" id="bannerCmp">Сравнить с моей</button>
+      <button class="btn ghost" id="bannerOwn">Открыть мою анкету</button>
+      <button class="btn ghost" id="bannerKeep">Заполнять как свою</button>
     </div>
   </div>
 
@@ -66,16 +68,10 @@
     <span style="color:var(--muted)">«роль» — давать / получать; «раньше» — уже пробовал(а)</span>
   </div>
 
-  <details class="about" id="aboutSection">
-    <summary>О себе</summary>
-    <div class="about-body" id="aboutBody"></div>
-  </details>
-
   <div id="list"></div>
   <div class="noresults" id="noresults">Ничего не найдено по запросу.</div>
 
   <footer class="foot">
-    <a class="pagelink" href="compare.html">→ Сравнить два заполненных списка</a><br><br>
     Инструмент для совершеннолетних. Данные хранятся локально в браузере устройства и не покидают его.
     Список практик собран и очищен от повторов из трёх источников (FormsPal, The Duchy, KinkSheet) плюс дополнения.
   </footer>
@@ -93,6 +89,15 @@
     <div id="qr"></div>
     <p style="text-align:center;margin:2px 0 0">QR удобно показать с экрана — навести камеру.</p>
     <button class="btn ghost" id="overlayClose" style="margin-top:14px;width:100%">Закрыть</button>
+  </div>
+</div>
+
+<div class="overlay" id="savedOverlay">
+  <div class="modal">
+    <h3>Полученные анкеты</h3>
+    <p>Анкеты, которые вы открыли по ссылке или QR, сохраняются здесь — на этом устройстве. Можно открыть анкету или сразу сравнить со своей.</p>
+    <div id="savedList"></div>
+    <button class="btn ghost" id="savedClose" style="margin-top:14px;width:100%">Закрыть</button>
   </div>
 </div>
 
@@ -209,27 +214,9 @@ document.getElementById("list").addEventListener("click", e=>{
   cleanup(id); save(); updateProgress();
 });
 
-document.getElementById("aboutBody").addEventListener("click", e=>{
-  const b=e.target.closest(".opt"); if(!b) return; const f=b.dataset.field;
-  if(b.dataset.type==="multi"){
-    let arr=Array.isArray(state.meta[f])?state.meta[f]:[]; const v=b.dataset.val;
-    if(arr.includes(v)) arr=arr.filter(x=>x!==v); else arr.push(v);
-    state.meta[f]=arr; b.setAttribute("aria-pressed", arr.includes(v)?"true":"false");
-  } else {
-    const cur=state.meta[f]; const v=b.dataset.val;
-    if(cur===v){ state.meta[f]=null; b.setAttribute("aria-pressed","false"); }
-    else { state.meta[f]=v; document.querySelectorAll('.opt[data-field="'+f+'"]').forEach(x=>x.setAttribute("aria-pressed","false")); b.setAttribute("aria-pressed","true"); }
-  }
-  save();
-});
-
 function bindText(id, key){ const e=document.getElementById(id); if(!e)return; e.addEventListener("input",()=>{ state[key]=e.value; save(); }); }
 bindText("metaName","name"); bindText("metaDate","date");
 document.getElementById("onlyMarked").addEventListener("change", e=>{ state.onlyMarked=e.target.checked; save(); });
-document.getElementById("aboutBody").addEventListener("input", e=>{
-  if(e.target.id==="metaSafeword"){ state.safeword=e.target.value; save(); }
-  else if(e.target.id&&e.target.id.startsWith("meta-")){ state[e.target.id.slice(5)]=e.target.value; save(); }
-});
 
 const search=document.getElementById("search");
 search.addEventListener("input", ()=>{
@@ -327,14 +314,6 @@ function buildSheet(mode){
   w.innerHTML=html; return w;
 }
 
-/* ---------------- Native print / Save-as-PDF ---------------- */
-document.getElementById("printBtn").addEventListener("click", ()=>{
-  const area=document.getElementById("printArea"); area.innerHTML=""; area.appendChild(buildSheet("print"));
-  const clean=()=>{ area.innerHTML=""; window.removeEventListener("afterprint",clean); };
-  window.addEventListener("afterprint",clean);
-  setTimeout(()=>window.print(),60);
-});
-
 /* ---------------- jsPDF download ---------------- */
 document.getElementById("pdfBtn").addEventListener("click", async function(){
   const btn=this; const old=btn.textContent; btn.disabled=true; btn.textContent="Готовлю PDF…";
@@ -365,7 +344,7 @@ document.getElementById("pdfBtn").addEventListener("click", async function(){
 });
 
 /* ---------------- Init ---------------- */
-load(); renderAbout(); renderList(); hydrate();
+load(); renderList(); hydrate();
 
 /* ---- shared-link banner ---- */
 if(viewingShared){ const b=document.getElementById("sharedBanner"); if(b) b.style.display="block"; }
@@ -389,6 +368,47 @@ document.getElementById("copyLink").addEventListener("click", async ()=>{
   try{ await navigator.clipboard.writeText(inp.value); toast("Ссылка скопирована"); }
   catch(e){ try{ document.execCommand("copy"); toast("Ссылка скопирована"); }catch(_){ toast("Скопируйте вручную"); } }
 });
+
+/* ---- Полученные анкеты (сохранение чужих на устройстве) ---- */
+const SAVED_KEY="checklist-saved-profiles-v1";
+const escH=s=>(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+function loadSaved(){ try{ return JSON.parse(localStorage.getItem(SAVED_KEY))||[]; }catch(e){ return []; } }
+function writeSaved(a){ try{ localStorage.setItem(SAVED_KEY, JSON.stringify(a)); }catch(e){} }
+function ownCode(){ try{ const raw=localStorage.getItem(STORAGE_KEY); if(raw) return encodeState(JSON.parse(raw)); }catch(e){} return viewingShared?"":encodeState(state); }
+function saveVisited(code,name){
+  if(!code) return; if(code===ownCode()) return;
+  const a=loadSaved(); if(a.some(x=>x.code===code)) return;
+  a.unshift({id:"p"+Date.now(), name:(name||"").trim(), code:code, ts:Date.now()});
+  if(a.length>60) a.length=60; writeSaved(a);
+}
+function fmtDate(ts){ const d=new Date(ts); return d.toLocaleDateString("ru-RU")+" "+d.toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"}); }
+function startCompare(aCode,bCode,aName,bName){
+  try{ sessionStorage.setItem("cmpA",aCode||""); sessionStorage.setItem("cmpB",bCode||""); sessionStorage.setItem("cmpAName",aName||""); sessionStorage.setItem("cmpBName",bName||""); }catch(e){}
+  location.href="compare.html";
+}
+function renderSaved(){
+  const box=document.getElementById("savedList"); const a=loadSaved();
+  if(!a.length){ box.innerHTML='<div style="color:var(--muted);font-size:13px;padding:8px 0">Пока пусто. Откройте чью-то ссылку или QR — анкета появится здесь.</div>'; return; }
+  box.innerHTML=a.map(x=>'<div class="saved-row" data-id="'+x.id+'"><div class="meta"><b>'+(x.name?escH(x.name):"Без имени")+'</b><span>'+fmtDate(x.ts)+'</span></div>'
+    +'<div class="acts"><button class="btn ghost mini" data-act="open">Открыть</button><button class="btn ghost mini" data-act="cmp">Сравнить</button><button class="btn ghost mini" data-act="del" title="Удалить">✕</button></div></div>').join("");
+}
+const savedOverlay=document.getElementById("savedOverlay");
+document.getElementById("savedBtn").addEventListener("click", ()=>{ renderSaved(); savedOverlay.classList.add("show"); });
+document.getElementById("savedClose").addEventListener("click", ()=>savedOverlay.classList.remove("show"));
+savedOverlay.addEventListener("click", e=>{ if(e.target===savedOverlay) savedOverlay.classList.remove("show"); });
+document.getElementById("savedList").addEventListener("click", e=>{
+  const btn=e.target.closest("button[data-act]"); if(!btn) return;
+  const row=btn.closest(".saved-row"); const id=row.dataset.id; const a=loadSaved(); const item=a.find(x=>x.id===id); if(!item) return;
+  const act=btn.dataset.act;
+  if(act==="open"){ location.href=location.pathname+"#"+item.code; }
+  else if(act==="cmp"){ startCompare(ownCode(), item.code, "Моя анкета", item.name||"Полученная"); }
+  else if(act==="del"){ writeSaved(a.filter(x=>x.id!==id)); renderSaved(); }
+});
+
+/* если открыта чужая анкета — сохранить её в «Полученные» и включить кнопку сравнения */
+if(viewingShared){ saveVisited(encodeState(state), state.name); }
+const bcmp=document.getElementById("bannerCmp");
+if(bcmp) bcmp.addEventListener("click", ()=>{ startCompare(ownCode(), encodeState(state), "Моя анкета", state.name||"Эта анкета"); });
 
 </script>
 </body>

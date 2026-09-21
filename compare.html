@@ -93,6 +93,21 @@ document.getElementById("cmpBtn").addEventListener("click",()=>{
   render(groups,nA,nB);
 });
 
+/* авто-подстановка при переходе «Сравнить с моей» из анкеты */
+(function(){
+  try{
+    const a=sessionStorage.getItem("cmpA"), b=sessionStorage.getItem("cmpB");
+    if(a===null && b===null) return;
+    const an=sessionStorage.getItem("cmpAName"), bn=sessionStorage.getItem("cmpBName");
+    if(a) document.getElementById("codeA").value=a;
+    if(b) document.getElementById("codeB").value=b;
+    if(an) document.getElementById("nameA").value=an;
+    if(bn) document.getElementById("nameB").value=bn;
+    ["cmpA","cmpB","cmpAName","cmpBName"].forEach(k=>sessionStorage.removeItem(k));
+    if(a && b) document.getElementById("cmpBtn").click();
+  }catch(e){}
+})();
+
 function render(groups,nA,nB){
   const meta=[
     ["match","Совпадения — оба «за»","var(--love)","У вас обоих интерес. С этого стоит начать."],
