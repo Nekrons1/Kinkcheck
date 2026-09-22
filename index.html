@@ -55,7 +55,7 @@
     <p>Личный чек-лист для обсуждения желаний и границ. Заполни спокойно и честно — можно оставлять пункты пустыми, если они не про тебя. Нажми «?» рядом с пунктом, если не уверен(а), что это. <b style="color:var(--ink);font-weight:600">Всё сохраняется только на этом устройстве</b>, в этом браузере, и никуда не отправляется.</p>
     <p>Заполненный список — это старт для разговора и согласия, а не обязательство. Стоп-слово и границы всегда важнее любой галочки.</p>
     <div class="idfields">
-      <label>Имя / ник<input type="text" id="metaName" autocomplete="off"></label>
+      <label>Имя / ник <span class="hint">только латиница</span><input type="text" id="metaName" autocomplete="off" placeholder="Latin only"></label>
       <label>Дата<input type="text" id="metaDate" autocomplete="off" placeholder="напр. 12.10"></label>
     </div>
   </section>
@@ -212,7 +212,12 @@ document.getElementById("list").addEventListener("click", e=>{
 });
 
 function bindText(id, key){ const e=document.getElementById(id); if(!e)return; e.addEventListener("input",()=>{ state[key]=e.value; save(); }); }
-bindText("metaName","name"); bindText("metaDate","date");
+bindText("metaDate","date");
+const _nm=document.getElementById("metaName");
+if(_nm) _nm.addEventListener("input", ()=>{
+  if(/[^\x00-\x7F]/.test(_nm.value)){ _nm.value=_nm.value.replace(/[^\x00-\x7F]/g,""); _nm.classList.add("bad"); clearTimeout(_nm._t); _nm._t=setTimeout(()=>_nm.classList.remove("bad"),900); }
+  state.name=_nm.value; save();
+});
 const _aboutBody=document.getElementById("aboutBody");
 if(_aboutBody) _aboutBody.addEventListener("click", e=>{
   const b=e.target.closest(".opt"); if(!b) return; const f=b.dataset.field;
@@ -401,7 +406,7 @@ function renderSaved(){
   const box=document.getElementById("savedList"); const a=loadSaved();
   if(!a.length){ box.innerHTML='<div style="color:var(--muted);font-size:13px;padding:8px 0">Пока пусто. Откройте чью-то ссылку или QR — анкета появится здесь.</div>'; return; }
   box.innerHTML=a.map(x=>'<div class="saved-row" data-id="'+x.id+'"><div class="meta"><b>'+(x.name?escH(x.name):"Без имени")+'</b><span>'+fmtDate(x.ts)+'</span></div>'
-    +'<div class="acts"><button class="btn ghost mini" data-act="open">Открыть</button><button class="btn ghost mini" data-act="cmp">Сравнить</button><button class="btn ghost mini" data-act="del" title="Удалить">✕</button></div></div>').join("");
+    +'<div class="acts"><button class="btn ghost mini" data-act="open">Открыть</button><button class="btn ghost mini" data-act="ren">Переименовать</button><button class="btn ghost mini" data-act="cmp">Сравнить</button><button class="btn ghost mini" data-act="del" title="Удалить">✕</button></div></div>').join("");
 }
 const savedOverlay=document.getElementById("savedOverlay");
 document.getElementById("savedBtn").addEventListener("click", ()=>{ renderSaved(); savedOverlay.classList.add("show"); });
@@ -411,7 +416,8 @@ document.getElementById("savedList").addEventListener("click", e=>{
   const btn=e.target.closest("button[data-act]"); if(!btn) return;
   const row=btn.closest(".saved-row"); const id=row.dataset.id; const a=loadSaved(); const item=a.find(x=>x.id===id); if(!item) return;
   const act=btn.dataset.act;
-  if(act==="open"){ location.href=location.pathname+"#"+item.code; }
+  if(act==="open"){ location.hash=item.code; location.reload(); }
+  else if(act==="ren"){ const nn=prompt("Название анкеты (латиницей):", item.name||""); if(nn!==null){ item.name=nn.replace(/[^\x00-\x7F]/g,"").trim(); writeSaved(a); renderSaved(); } }
   else if(act==="cmp"){ startCompare(ownCode(), item.code, "Моя анкета", item.name||"Полученная"); }
   else if(act==="del"){ writeSaved(a.filter(x=>x.id!==id)); renderSaved(); }
 });
