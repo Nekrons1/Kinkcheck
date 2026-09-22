@@ -24,13 +24,13 @@
 <main class="wrap">
   <section class="intro">
     <h1>Сравнить два списка</h1>
-    <p>Вставьте две ссылки (или коды из ссылок) — совпадения посчитаются прямо здесь, в браузере. <b style="color:var(--ink);font-weight:600">Ничего не отправляется и не сохраняется.</b> Правило простое: если хотя бы у одного стоит «Нет» — пункт исключается.</p>
+    <p>Колонка <b style="color:var(--ink);font-weight:600">A уже подставлена вашей анкетой</b> с этого устройства — заполните только B (или замените A другой ссылкой). Считается прямо здесь, в браузере, ничего не отправляется. Правило: если хотя бы у одного стоит «Нет» — пункт исключается.</p>
   </section>
 
   <div class="cmp-inputs">
     <div class="cmp-col">
       <input class="cmp-name" id="nameA" placeholder="Имя / метка A (необязательно)" autocomplete="off">
-      <label>Ссылка или код A</label>
+      <label>Ссылка или код A <button class="btn ghost mini" id="fillMine" type="button" style="float:right;margin-top:-4px">Подставить мою</button></label>
       <textarea id="codeA" placeholder="Вставьте ссылку сюда…"></textarea>
     </div>
     <div class="cmp-col">
@@ -107,6 +107,27 @@ document.getElementById("cmpBtn").addEventListener("click",()=>{
     if(a && b) document.getElementById("cmpBtn").click();
   }catch(e){}
 })();
+
+/* колонка A по умолчанию = моя анкета с этого устройства (можно заменить) */
+(function(){
+  try{
+    if(document.getElementById("codeA").value.trim()) return;
+    const raw=localStorage.getItem("practices-checklist-v1"); if(!raw) return;
+    const own=JSON.parse(raw);
+    document.getElementById("codeA").value=encodeState(own);
+    if(!document.getElementById("nameA").value) document.getElementById("nameA").value=own.name||"Моя анкета";
+  }catch(e){}
+})();
+document.getElementById("fillMine").addEventListener("click", ()=>{
+  try{
+    const raw=localStorage.getItem("practices-checklist-v1");
+    if(!raw){ toast("На этом устройстве нет вашей анкеты"); return; }
+    const own=JSON.parse(raw);
+    document.getElementById("codeA").value=encodeState(own);
+    document.getElementById("nameA").value=own.name||"Моя анкета";
+    toast("Подставлена ваша анкета");
+  }catch(e){ toast("Не удалось"); }
+});
 
 function render(groups,nA,nB){
   const meta=[

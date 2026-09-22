@@ -68,6 +68,11 @@
     <span style="color:var(--muted)">«роль» — давать / получать; «раньше» — уже пробовал(а)</span>
   </div>
 
+  <details class="about" id="aboutSection">
+    <summary>О себе</summary>
+    <div class="about-body" id="aboutBody"></div>
+  </details>
+
   <div id="list"></div>
   <div class="noresults" id="noresults">Ничего не найдено по запросу.</div>
 
@@ -128,20 +133,12 @@ function save(){ if(viewingShared) return; clearTimeout(saveTimer); saveTimer=se
 function el(tag, cls, txt){ const e=document.createElement(tag); if(cls)e.className=cls; if(txt!=null)e.textContent=txt; return e; }
 
 function renderAbout(){
-  const body=document.getElementById("aboutBody");
+  const body=document.getElementById("aboutBody"); if(!body) return;
   META.forEach(f=>{
     const field=el("div","field"); field.appendChild(el("div","flabel",f.label));
     const opts=el("div","opts");
     f.opts.forEach(o=>{ const b=el("button","opt",o); b.type="button"; b.setAttribute("aria-pressed","false"); b.dataset.field=f.id; b.dataset.val=o; b.dataset.type=f.type; opts.appendChild(b); });
     field.appendChild(opts); body.appendChild(field);
-  });
-  const sw=el("div","field safeword"); sw.appendChild(el("div","flabel","Стоп-слово"));
-  const swi=document.createElement("input"); swi.type="text"; swi.id="metaSafeword"; swi.autocomplete="off"; sw.appendChild(swi); body.appendChild(sw);
-  [["allergies","Аллергии / медицинские ограничения (латекс, продукты, травмы…)"],
-   ["fantasies","Фантазии, которые хочется попробовать"],
-   ["comments","Комментарии / что важно знать обо мне"]].forEach(([id,lab])=>{
-    const f=el("div","field"); f.appendChild(el("div","flabel",lab));
-    const ta=document.createElement("textarea"); ta.id="meta-"+id; f.appendChild(ta); body.appendChild(f);
   });
 }
 
@@ -216,6 +213,20 @@ document.getElementById("list").addEventListener("click", e=>{
 
 function bindText(id, key){ const e=document.getElementById(id); if(!e)return; e.addEventListener("input",()=>{ state[key]=e.value; save(); }); }
 bindText("metaName","name"); bindText("metaDate","date");
+const _aboutBody=document.getElementById("aboutBody");
+if(_aboutBody) _aboutBody.addEventListener("click", e=>{
+  const b=e.target.closest(".opt"); if(!b) return; const f=b.dataset.field;
+  if(b.dataset.type==="multi"){
+    let arr=Array.isArray(state.meta[f])?state.meta[f]:[]; const v=b.dataset.val;
+    if(arr.includes(v)) arr=arr.filter(x=>x!==v); else arr.push(v);
+    state.meta[f]=arr; b.setAttribute("aria-pressed", arr.includes(v)?"true":"false");
+  } else {
+    const cur=state.meta[f]; const v=b.dataset.val;
+    if(cur===v){ state.meta[f]=null; b.setAttribute("aria-pressed","false"); }
+    else { state.meta[f]=v; document.querySelectorAll('.opt[data-field="'+f+'"]').forEach(x=>x.setAttribute("aria-pressed","false")); b.setAttribute("aria-pressed","true"); }
+  }
+  save();
+});
 document.getElementById("onlyMarked").addEventListener("change", e=>{ state.onlyMarked=e.target.checked; save(); });
 
 const search=document.getElementById("search");
@@ -344,7 +355,7 @@ document.getElementById("pdfBtn").addEventListener("click", async function(){
 });
 
 /* ---------------- Init ---------------- */
-load(); renderList(); hydrate();
+load(); renderAbout(); renderList(); hydrate();
 
 /* ---- shared-link banner ---- */
 if(viewingShared){ const b=document.getElementById("sharedBanner"); if(b) b.style.display="block"; }
@@ -357,7 +368,7 @@ document.getElementById("shareBtn").addEventListener("click", ()=>{
   const link=location.origin+location.pathname+"#"+encodeState(state);
   document.getElementById("shareLink").value=link;
   const qr=document.getElementById("qr"); qr.innerHTML="";
-  try{ new QRCode(qr,{text:link,width:200,height:200,correctLevel:QRCode.CorrectLevel.L}); }
+  try{ new QRCode(qr,{text:link,width:240,height:240,correctLevel:QRCode.CorrectLevel.M}); }
   catch(e){ qr.innerHTML='<div style="color:var(--muted);font-size:13px;text-align:center">Ссылка слишком длинная для QR (много текста в полях). Используйте копирование.</div>'; }
   overlay.classList.add("show");
 });

@@ -66,8 +66,9 @@ const DATA = [
    ["Секс-качели (loveswing)","Loveswing","Подвесные качели-опора для секса."],
    ["Анальный «замок» (запираемая пробка)","Locking anal plug","Запираемая анальная пробка или устройство."],
    ["Вагинальный «замок»","Locking vaginal insert","Запираемое вагинальное устройство."],
-   ["Носовой крюк (shibari)","Nose hook","Крюк, оттягивающий нос вверх, часто в шибари."],
+   ["Носовой крюк","Nose hook","Крюк, оттягивающий нос вверх."],
    ["Металлический ошейник","Metal collar","Жёсткий стальной или металлический ошейник."],
+   ["Полуподвес","Partial suspension","Частичное подвешивание: часть тела остаётся на опоре."],
  ]},
  {c:"Фетиши", e:"Fetishes", items:[
    ["Поклонение ботинкам","Boot worship","Уход и почитание обуви партнёра."],
@@ -92,6 +93,8 @@ const DATA = [
    ["Поклонение вульве","Pussy worship","Почитание и ласки вульвы."],
    ["Оральная фиксация","Oral fixation","Тяга постоянно держать что-то во рту."],
    ["Фетиш на пирсинг партнёра","Piercing fetish","Влечение к уже имеющемуся пирсингу партнёра."],
+   ["Фуд-плей (еда в игре)","Food play","Использование еды в чувственной или сексуальной игре."],
+   ["Размазывание еды по телу","Food smearing (sploshing)","Размазывание еды по телу партнёра."],
  ]},
  {c:"Ролевые игры", e:"Role play", items:[
    ["Брошенность (фантазия)","Abandonment","Фантазия об оставленности, игнорировании."],
@@ -111,7 +114,6 @@ const DATA = [
    ["«Психбольница»","Psych ward play","Сцены в антураже психбольницы."],
    ["Тюремные сцены","Prison scenes","Ролевые игры «тюрьма — охранник»."],
    ["Фантазия о проституции","Prostitution fantasy","Ролевая игра в клиента и эскорт."],
-   ["Религиозные сцены","Religious scenes","Ролевые игры с религиозным антуражем."],
    ["Школьные сцены","Schoolroom scenes","Ролевые игры «учитель — ученик» (взрослые)."],
    ["Обучающие сцены (sex-ed)","Practical sex ed","Ролевой «секс-ликбез»."],
    ["Невидимый партнёр","Unseen actor","Не видишь, кто с тобой взаимодействует."],
@@ -121,11 +123,9 @@ const DATA = [
    ["Смена ролей (верх / низ)","Switching roles","Чередование ролей верх и низ."],
    ["Полный обмен властью (TPE)","Total Power Exchange","Тотальная передача контроля партнёру."],
    ["Измена (ролевая фантазия)","Cheating fantasy","Ролевой сценарий измены."],
-   ["Инцест — ролевая фантазия (18+)","Incest (fantasy)","Симулированная фантазия; только совершеннолетние актёры."],
-   ["Некро-игра (по согласию)","Necro (roleplay)","Ролевая игра с «неподвижным» партнёром, по согласию."],
    ["Другие ролевые игры","Other roleplaying","Любые иные ролевые сценарии."],
    ["Брат-плей (дерзость)","Bratting","Игривое сопротивление и дерзость сабмиссива."],
-   ["Укрощение брата","Brat taming","«Укрощение» дерзкого, непослушного сабмиссива."],
+   ["Укрощение / сопротивление","Brat taming","«Укрощение» дерзкого, сопротивляющегося сабмиссива."],
    ["24/7 D/s (lifestyle)","24/7 D/s lifestyle","Динамика власти, поддерживаемая постоянно, в быту."],
  ]},
  {c:"Служение и контроль поведения", e:"Service & control", items:[
@@ -322,6 +322,8 @@ const DATA = [
    ["Катетеризация","Catheterization","Введение катетера в уретру."],
    ["Гинекологическое зеркало","Speculums","Расширитель (speculum) для «осмотра»."],
    ["Фантазия об изнасиловании (CNC)","Fantasy rape play","Ролевая игра «без согласия» — по договорённости."],
+   ["CNC (одиночный)","CNC (single)","Согласованная игра «без согласия» как отдельная разовая сцена."],
+   ["Dubcon (сомнительное согласие)","Dubcon","Игра с «сомнительным согласием» — серая зона по договорённости."],
    ["Иррумация","Irrumatio","Активный оральный: партнёр сам совершает фрикции в горло."],
    ["Грубый секс","Rough sex","Жёсткий, напористый секс по согласию."],
    ["Грубый фингеринг","Rough fingering","Интенсивная, напористая стимуляция пальцами."],
@@ -412,18 +414,59 @@ const _RMAP={"":0,give:1,receive:2,both:3}, _RREV=["","give","receive","both"];
 function _b64url(bytes){ let s=""; for(const b of bytes) s+=String.fromCharCode(b); return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); }
 function _unb64url(s){ s=s.replace(/-/g,"+").replace(/_/g,"/"); while(s.length%4)s+="="; const bin=atob(s), out=[]; for(let i=0;i<bin.length;i++)out.push(bin.charCodeAt(i)); return out; }
 
+/* v2: разреженная упаковка, только «интерес» (то, что нужно для сравнения и обмена).
+   Байты: [2, varint(gap*4 + (iv-1)) ...], gap — сколько пустых пунктов пропущено.
+   Роль/«раньше» в ссылку не кладутся — они и так остаются в локальной копии владельца.
+   Декодер понимает и старый формат v1 (6 бит/пункт с ролью). */
 function packAnswers(items){
-  const bits=[]; const push6=v=>{ for(let b=5;b>=0;b--) bits.push((v>>b)&1); };
-  ORDER.forEach(id=>{ const s=items[id]||{}; const iv=_IMAP[s.interest]||0, rv=_RMAP[s.role||""]||0, tv=s.tried?1:0; push6(iv | (rv<<3) | (tv<<5)); });
-  const bytes=[1]; for(let i=0;i<bits.length;i+=8){ let b=0; for(let j=0;j<8;j++) b=(b<<1)|(bits[i+j]||0); bytes.push(b); }
+  const bytes=[2]; let prev=-1;
+  ORDER.forEach((id,idx)=>{
+    const s=items[id]; const iv=s&&_IMAP[s.interest]; if(!iv) return;
+    let n=(idx-prev-1)*4 + (iv-1); prev=idx;
+    while(n>=128){ bytes.push((n&127)|128); n>>>=7; } bytes.push(n);
+  });
   return _b64url(bytes);
 }
 function unpackAnswers(str){
   let bytes; try{ bytes=_unb64url(str); }catch(e){ return {}; }
+  if(!bytes.length) return {};
+  const items={};
+  if(bytes[0]===2){
+    let i=1, idx=-1;
+    while(i<bytes.length){
+      let n=0, shift=0, b;
+      do{ b=bytes[i++]; n|=(b&127)<<shift; shift+=7; }while((b&128) && i<bytes.length);
+      const iv=(n&3)+1; idx += (n>>2)+1;
+      const id=ORDER[idx]; if(id) items[id]={interest:_IREV[iv]||null, role:"", tried:false};
+    }
+    return items;
+  }
+  /* legacy v1 */
   const bits=[]; for(let k=1;k<bytes.length;k++) for(let j=7;j>=0;j--) bits.push((bytes[k]>>j)&1);
-  const items={}; let p=0;
+  let p=0;
   ORDER.forEach(id=>{ let v=0; for(let b=0;b<6;b++) v=(v<<1)|(bits[p++]||0); const iv=v&7, rv=(v>>3)&3, tv=(v>>5)&1; if(iv||rv||tv) items[id]={interest:_IREV[iv]||null, role:_RREV[rv]||"", tried:!!tv}; });
   return items;
+}
+
+/* --- компактная упаковка мета-блока «О себе» (индексами вариантов) --- */
+function metaPack(meta){
+  meta=meta||{}; const bytes=[];
+  META.forEach(f=>{
+    if(f.type==="multi"){ let mask=0; const v=meta[f.id]; if(Array.isArray(v)) f.opts.forEach((o,i)=>{ if(v.indexOf(o)>=0) mask|=(1<<i); }); bytes.push(mask&255); }
+    else { const v=meta[f.id]; const idx=v?f.opts.indexOf(v):-1; bytes.push((idx<0?0:idx+1)&255); }
+  });
+  while(bytes.length && bytes[bytes.length-1]===0) bytes.pop();
+  return bytes.length ? _b64url(bytes) : "";
+}
+function metaUnpack(str){
+  const meta={}; if(!str) return meta;
+  if(str.indexOf("%")>=0 || str.charAt(0)==="{"){ try{ return JSON.parse(decodeURIComponent(str)); }catch(e){ return {}; } } /* legacy JSON */
+  let bytes; try{ bytes=_unb64url(str); }catch(e){ return meta; }
+  META.forEach((f,i)=>{ const byte=bytes[i]||0;
+    if(f.type==="multi"){ const arr=[]; f.opts.forEach((o,bit)=>{ if(byte&(1<<bit)) arr.push(o); }); if(arr.length) meta[f.id]=arr; }
+    else if(byte>0 && f.opts[byte-1]!=null) meta[f.id]=f.opts[byte-1];
+  });
+  return meta;
 }
 
 /* --- полное состояние <-> строка хэша --- */
@@ -432,8 +475,7 @@ function encodeState(st){
   const add=(k,v)=>{ if(v) parts.push(k+"="+encodeURIComponent(v)); };
   add("n",st.name); add("d",st.date); add("s",st.safeword);
   add("f",st.fantasies); add("c",st.comments); add("l",st.allergies);
-  const m={}; Object.keys(st.meta||{}).forEach(k=>{ const v=st.meta[k]; if(v&&(!Array.isArray(v)||v.length)) m[k]=v; });
-  if(Object.keys(m).length) parts.push("m="+encodeURIComponent(JSON.stringify(m)));
+  const mp=metaPack(st.meta); if(mp) parts.push("m="+mp);
   return parts.join("&");
 }
 function decodeState(hash){
@@ -443,7 +485,7 @@ function decodeState(hash){
   if(q.get("a")) st.items=unpackAnswers(q.get("a"));
   st.name=q.get("n")||""; st.date=q.get("d")||""; st.safeword=q.get("s")||"";
   st.fantasies=q.get("f")||""; st.comments=q.get("c")||""; st.allergies=q.get("l")||"";
-  if(q.get("m")){ try{ st.meta=JSON.parse(q.get("m")); }catch(e){} }
+  if(q.get("m")) st.meta=metaUnpack(q.get("m"));
   return st;
 }
 /* извлечь строку кода из вставленной ссылки ИЛИ голого кода */
