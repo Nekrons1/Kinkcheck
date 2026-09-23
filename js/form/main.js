@@ -30,6 +30,10 @@
 
   /* 3. draw */
   F.renderAll();
+  /* answers to items that no longer exist (removed from the list): not shown, not in links */
+  const known = {}; KC.CATS.forEach(c => c.items.forEach(([, id]) => known[id] = 1));
+  const orphan = Object.keys(F.state.items).filter(id => !known[id]);
+  if (orphan.length) console.info("[kinkcheck] answers to removed items (not shown, not shared):", orphan);
   /* stale language file on the server shows up here (items fall back to English) */
   const miss = KC.i18n.missing();
   if (miss.length) console.warn("[kinkcheck] js/lang/" + KC.i18n.lang + ".practices.js lacks " + miss.length + " items (outdated file?):", miss);

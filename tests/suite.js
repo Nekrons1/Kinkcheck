@@ -312,6 +312,17 @@ const S = (title) => console.log("\n## " + title);
   // header: progress in the title row, export toggle in the search row
   ok(bp.d.querySelector(".brand-row #progress") && bp.d.querySelector(".subbar #onlyMarked") && !bp.d.querySelector(".progress-row"), "compact header layout");
 
+  /* answers saved under ids of the earliest versions */
+  const ghost = { name: "Ns", meta: {}, items: { hugging: { interest: "love" }, "human-puppy-dog-play": { interest: "yes" }, "knife-play-no-blood": { interest: "maybe" },
+    "cbt-cock-ball-torture": { interest: "limit" }, orgy: { interest: "yes" }, "group-play-orgy": { interest: "limit" }, bestiality: { interest: "limit" } } };
+  const gp = open("form", { navLang: "ru", storage: { local: { "practices-checklist-v1": JSON.stringify(ghost) }, session: {} } });
+  eq(Object.entries(gp.KC.form.state.items).filter(([id]) => ids.indexOf(id) >= 0).sort(), [["cbt", { interest: "limit" }], ["hugging", { interest: "love" }], ["knife-play", { interest: "maybe" }], ["orgy", { interest: "yes" }], ["puppy-play", { interest: "yes" }]], "old ids moved to current items; current answer wins");
+  ok(gp.d.querySelector('.item[data-id="puppy-play"] .scale button[data-v="yes"]').classList.contains("sel"), "moved answer is visible on the page");
+  const gShown = gp.d.querySelectorAll(".scale button.sel").length, gLink = Object.keys(KCn.codec.decode(gp.KC.form.shareLink()).items).length;
+  eq(gp.d.getElementById("progress").textContent, "Отмечено " + gShown + " из 406 практик", "counter = what is shown");
+  eq(gLink, gShown, "link contains exactly what the counter says");
+  Object.keys(KC.ID_ALIASES).forEach(k => { if (ids.indexOf(KC.ID_ALIASES[k]) < 0) ok(false, "alias target missing: " + k); });
+
   /* ---------- 6. codec robustness + future additions ---------- */
   S("codec");
   let rt = 0;

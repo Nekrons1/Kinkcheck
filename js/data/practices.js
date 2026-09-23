@@ -445,5 +445,48 @@ KC.CATS = [
    371 = everything added after the v371 release. Raise it to retire the dots. */
 KC.NEW_FROM_CODE = 371;
 
+/* Item ids used by the earliest versions (before v371), when ids were made from the English name.
+   Answers saved under these ids in browsers are moved to the current item on load. */
+KC.ID_ALIASES = {
+  "abandonment-fantasy": "abandonment",
+  "age-play-not-paedophilia": "age-play",
+  "bondage-all-day-multi-day": "bondage-all-day",
+  "cages-cells-locked-inside": "cages-cells",
+  "cbt-cock-ball-torture": "cbt",
+  "cbt-crushing-trampling": "cbt-crushing",
+  "chains-bound-with": "chains",
+  "chastity-device-belt": "chastity-device",
+  "chores-housework": "chores",
+  "cuffs-handcuff-style": "cuffs-handcuff",
+  "cutting-blood-play": "blood-play",
+  "ear-plugs-sound-deprivation": "ear-plugs",
+  "electricity-tens-unit": "electricity-tens",
+  "eye-contact-restrictions": "eye-contact-rules",
+  "gor-slave-training": "gor-training",
+  "group-play-multiple-men": "group-multiple-men",
+  "group-play-orgy": "orgy",
+  "group-play-women-men": "group-mixed",
+  "harems-with-other-subs": "harems",
+  "human-puppy-dog-play": "puppy-play",
+  "knife-play-no-blood": "knife-play",
+  "lecturing-for-misbehaviours": "lecturing",
+  "milking-breast-milk": "milking",
+  "modeling-for-erotic-photos": "erotic-photos",
+  "nipple-play-pulls-twists": "nipple-play",
+  "pearl-shower-on-face": "cum-on-face",
+  "serving-other-doms-supervised": "serving-other-doms",
+  "stocks-head-hands": "stocks",
+  "strap-on-penetrated-by": "strap-on-penetrated",
+  "strapping-full-body": "strapping",
+  "swapping-one-couple": "swapping",
+  "swinging-multiple-couples": "swinging",
+  "video-recordings-of-you": "video-of-you",
+  "video-watching-others": "video-others",
+  "voyeurism-watching-others": "voyeurism-others",
+  "voyeurism-your-dom-with-others": "voyeurism-your-dom",
+  "wax-play-candles": "wax-play",
+  "whipping-cat-o-nine-tails": "whipping-cat-o-nine",
+};
+
 /* Codes of removed items — kept reserved so old links are never misread. */
 KC.RETIRED_CODES = [];

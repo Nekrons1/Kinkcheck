@@ -106,9 +106,9 @@
   };
 
   F.updateProgress = function () {
+    /* only items that exist in the list: the number always matches what goes into a link */
     let n = 0, total = 0;
-    Object.keys(F.state.items).forEach(k => { if (F.state.items[k].interest) n++; });
-    KC.CATS.forEach(c => total += c.items.length);
+    KC.CATS.forEach(c => c.items.forEach(([, id]) => { total++; if (F.state.items[id] && F.state.items[id].interest) n++; }));
     KC.$("progress").textContent = t("progress", { n, total });
   };
 

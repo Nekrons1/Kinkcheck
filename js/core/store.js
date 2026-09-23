@@ -13,8 +13,10 @@
       ["name", "safeword", "fantasies", "comments", "allergies"].forEach(k => { if (typeof src[k] === "string") st[k] = src[k]; });
       if (src.onlyMarked === false) st.onlyMarked = false;
       st.meta = KC.normalizeMeta(src.meta);
-      const items = src.items || {};
-      Object.keys(items).forEach(id => { const v = items[id] && items[id].interest; if (VALID[v]) st.items[id] = { interest: v }; });
+      const items = src.items || {}, AL = KC.ID_ALIASES || {};
+      Object.keys(items).forEach(id => { const v = items[id] && items[id].interest; if (VALID[v] && !AL[id]) st.items[id] = { interest: v }; });
+      /* answers saved under ids of the earliest versions go to the current item (current answer wins) */
+      Object.keys(items).forEach(id => { const v = items[id] && items[id].interest; const to = AL[id]; if (to && VALID[v] && !st.items[to]) st.items[to] = { interest: v }; });
       return st;
     },
     clone: st => JSON.parse(JSON.stringify(st)),
