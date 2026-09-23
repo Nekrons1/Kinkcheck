@@ -23,7 +23,7 @@ KC.addLang("es", "ui", {
   "progress": "{n} de {total} prácticas marcadas",
   "onlyMarked": "Exportar solo lo marcado",
 
-  "banner_html": "Has abierto una lista desde un enlace o QR. Se ha guardado en «Recibidas». Los cambios <b>todavía no se guardan</b> en este navegador, para no sobrescribir tu propia lista.",
+  "banner_html": "Has abierto una lista desde un enlace o QR. {status} Los cambios <b>todavía no se guardan</b> en este navegador, para no sobrescribir tu propia lista.",
   "banner.cmp": "Comparar con la mía",
   "banner.own": "Abrir mi lista",
   "banner.keep": "Usar como mía",
@@ -119,4 +119,8 @@ KC.addLang("es", "ui", {
   "cmp.g.discBoth.sub": "A ambos les da curiosidad: vale la pena probar con cuidado después de hablarlo.",
   "item.new": "Punto nuevo",
   "legend.new": "puntos nuevos, que antes no estaban en la lista",
+  "banner.saved": "Se ha guardado en «Recibidas».",
+  "banner.exists": "Ya está en «Recibidas» como «{name}» y se ha movido arriba.",
+  "banner.existsUnnamed": "Ya está en «Recibidas» y se ha movido arriba.",
+  "banner.own": "Es tu propia lista de este dispositivo, así que no se ha añadido a «Recibidas».",
 });

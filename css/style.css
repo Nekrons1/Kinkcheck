@@ -253,3 +253,26 @@ input.bad{border-color:var(--limit)!important;background:var(--limit-bg)}
   .brand-row .brand{font-size:16px;min-width:0;overflow:hidden;text-overflow:ellipsis}
   .lang-btn{padding:6px 7px;font-size:11px}
 }
+
+/* compact sticky header: progress in the title row, export toggle next to "Download PDF" */
+.progress-inline{font-size:12.5px;color:var(--muted);white-space:nowrap}
+.top-inner{padding:7px 14px;row-gap:7px}
+.top-actions{gap:6px}
+.top-actions .btn{padding:6px 10px;font-size:14px}
+.top-actions .icon-btn{padding:6px 9px}
+.subbar{flex-wrap:wrap;row-gap:6px}
+.subbar .only-toggle{font-size:12.5px;color:var(--muted);white-space:nowrap}
+@media (max-width:560px){ .subbar .only-toggle{flex-basis:100%;font-size:11.5px} }
+.subbar{padding-top:0;padding-bottom:8px}
+@media (max-width:560px){
+  .brand-row{flex-wrap:wrap;row-gap:2px}
+  .progress-inline{order:3;flex-basis:100%;font-size:11.5px}
+  .top-actions .btn{padding:6px 8px;font-size:13px}
+}
+.subbar select.jump{flex:0 1 190px;min-width:0}
+/* phones: action buttons in one horizontally scrollable row */
+@media (max-width:560px){
+  .top-actions{flex-wrap:nowrap;overflow-x:auto;width:100%;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:1px}
+  .top-actions::-webkit-scrollbar{display:none}
+  .top-actions > *{flex:0 0 auto}
+}

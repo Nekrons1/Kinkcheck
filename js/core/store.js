@@ -48,13 +48,17 @@
         return a;
       },
       write(a) { KC.ls.set(KC.KEYS.saved, a); },
+      /* -> {status: "added" | "exists" (moved to top) | "own", item} */
       add(code, name) {
-        if (!code) return;
+        if (!code) return { status: "none" };
         const k = KC.codec.key(code);
-        if (S.hasOwn() && k === KC.codec.key(S.ownCode())) return;
-        const a = this.list(); if (a.some(x => KC.codec.key(x.code) === k)) return;
-        a.unshift({ id: "p" + Date.now(), name: (name || "").trim(), code, ts: Date.now() });
-        if (a.length > 60) a.length = 60; this.write(a);
+        const mineKeys = S.mine.list().map(x => { try { return KC.codec.key(KC.codec.encode(S.normalize(x.data))); } catch (e) { return ""; } });
+        if ((S.hasOwn() && k === KC.codec.key(S.ownCode())) || mineKeys.indexOf(k) >= 0) return { status: "own" };
+        const a = this.list(); const i = a.findIndex(x => KC.codec.key(x.code) === k);
+        if (i >= 0) { const item = a.splice(i, 1)[0]; item.ts = Date.now(); a.unshift(item); this.write(a); return { status: "exists", item }; }
+        const item = { id: "p" + Date.now(), name: (name || "").trim(), code, ts: Date.now() };
+        a.unshift(item); if (a.length > 60) a.length = 60; this.write(a);
+        return { status: "added", item };
       },
     },
 

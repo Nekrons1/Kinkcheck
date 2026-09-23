@@ -257,6 +257,26 @@ const S = (title) => console.log("\n## " + title);
   const k1 = KCn.codec.key(oldRec), k2 = KCn.codec.key(KCn.codec.encode(KCn.codec.decode(oldRec), "en"));
   eq(k1 === k2 && k1 !== KCn.codec.key("a=Ag&n=Ns"), true, "key: same content = same key across versions/languages, different content differs");
 
+  /* banner tells honestly what happened with "Received" */
+  const lnk = KCn.codec.encode({ items: { hugging: { interest: "love" } }, meta: {} });
+  let bp = open("form", { hash: lnk, navLang: "ru" });
+  ok(/сохранена в «Полученные»/.test(bp.d.getElementById("bannerText").textContent), "banner: saved");
+  bp = open("form", { hash: lnk, navLang: "ru", storage: { local: { "practices-checklist-v1": JSON.stringify(Object.assign(KCn.store.blank(), { items: { hugging: { interest: "love" } } })) }, session: {} } });
+  ok(/ваша собственная анкета/.test(bp.d.getElementById("bannerText").textContent) && !bp.w.localStorage.getItem("checklist-saved-profiles-v1"), "banner: own list, not added");
+  const recS = JSON.stringify([{ id: "pA", name: "A", code: "a=Ag&n=Other", ts: 5 }, { id: "pB", name: "Облако", code: lnk, ts: 1 }]);
+  bp = open("form", { hash: lnk, navLang: "ru", storage: { local: { "checklist-saved-profiles-v1": recS }, session: {} } });
+  const recA = JSON.parse(bp.w.localStorage.getItem("checklist-saved-profiles-v1"));
+  eq([recA.length, recA[0].id], [2, "pB"], "already received: not duplicated, moved to top");
+  ok(/под именем «Облако»/.test(bp.d.getElementById("bannerText").textContent), "banner: exists, shows its name");
+  click(bp.w, bp.d.querySelector('#langSw button[data-lang="en"]'));
+  ok(/already under “Received” as “Облако”/.test(bp.d.getElementById("bannerText").textContent), "banner status survives language switch");
+  // own list stored only in My lists also counts as own
+  const mineOnly = JSON.stringify([{ id: "m1", name: "", data: Object.assign(KCn.store.blank(), { items: { hugging: { interest: "love" } } }), ts: 1 }]);
+  bp = open("form", { hash: lnk, navLang: "ru", storage: { local: { "checklist-my-profiles-v1": mineOnly, "checklist-active-mine-id": "" }, session: {} } });
+  ok(/ваша собственная анкета/.test(bp.d.getElementById("bannerText").textContent), "banner: matches one of My lists");
+  // header: progress in the title row, export toggle in the search row
+  ok(bp.d.querySelector(".brand-row #progress") && bp.d.querySelector(".subbar #onlyMarked") && !bp.d.querySelector(".progress-row"), "compact header layout");
+
   /* ---------- 6. codec robustness + future additions ---------- */
   S("codec");
   let rt = 0;

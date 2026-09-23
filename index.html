@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=492">
+<link rel="stylesheet" href="css/style.css?v=500">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -20,6 +20,7 @@
   <div class="top-inner">
     <div class="brand-row">
       <span class="brand"><span class="lock">🔒</span><span data-i18n="app.title"></span></span>
+      <span class="progress-inline" id="progress"></span>
       <div class="lang-sw" id="langSw" role="group"></div>
     </div>
     <div class="top-actions">
@@ -38,9 +39,6 @@
       <input type="search" id="search" data-i18n-ph="search.ph" autocomplete="off">
     </div>
     <select class="jump" id="jump" data-i18n-title="jump.aria"></select>
-  </div>
-  <div class="progress-row">
-    <span id="progress"></span>
     <label class="only-toggle"><input type="checkbox" id="onlyMarked" checked> <span data-i18n="onlyMarked"></span></label>
   </div>
 </header>
@@ -48,7 +46,7 @@
 <main class="wrap">
 
   <div class="banner" id="sharedBanner">
-    <span data-i18n-html="banner_html"></span>
+    <span id="bannerText"></span>
     <div class="row">
       <button class="btn" id="bannerCmp" data-i18n="banner.cmp"></button>
       <button class="btn ghost" id="bannerOwn" data-i18n="banner.own"></button>
@@ -122,6 +120,6 @@
   </div>
 </div>
 
-<script src="js/boot.js?v=492" data-page="form" data-v="492"></script>
+<script src="js/boot.js?v=500" data-page="form" data-v="500"></script>
 </body>
 </html>

@@ -22,7 +22,7 @@ KC.addLang("en", "ui", {
   "progress": "{n} of {total} practices marked",
   "onlyMarked": "Export marked items only",
 
-  "banner_html": "You opened a list from a link or QR. It has been saved under “Received”. Changes <b>are not saved</b> to this browser yet, so your own list stays untouched.",
+  "banner_html": "You opened a list from a link or QR. {status} Changes <b>are not saved</b> to this browser yet, so your own list stays untouched.",
   "banner.cmp": "Compare with mine",
   "banner.own": "Open my list",
   "banner.keep": "Use as my own",
@@ -120,4 +120,8 @@ KC.addLang("en", "ui", {
   "cmp.g.discBoth.sub": "You are both curious: worth trying carefully after talking it through.",
   "item.new": "New item",
   "legend.new": "new items, not in earlier versions of the list",
+  "banner.saved": "It has been saved under “Received”.",
+  "banner.exists": "It is already under “Received” as “{name}” and has been moved to the top.",
+  "banner.existsUnnamed": "It is already under “Received” and has been moved to the top.",
+  "banner.own": "This is your own list from this device, so it was not added to “Received”.",
 });

@@ -32,7 +32,8 @@
 
   /* 4. opened from a link: remember it under "Received", show banner */
   if (F.viewingShared) {
-    KC.store.received.add(F.sharedCode, F.state.name);
+    F.receivedResult = KC.store.received.add(F.sharedCode, F.state.name);
+    F.renderBanner();
     KC.$("sharedBanner").style.display = "block";
   }
   KC.$("bannerOwn").addEventListener("click", () => { location.href = location.pathname; });
