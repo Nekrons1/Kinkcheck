@@ -29,6 +29,7 @@
     const top = KC.$("roleTop"), about = KC.$("aboutBody");
     top.innerHTML = ""; about.innerHTML = "";
     KC.PROFILE.forEach(f => {
+      if (f.hidden) return;
       const field = KC.el("div", "field");
       field.appendChild(KC.el("div", "flabel", KC.i18n.fieldLabel(f.id)));
       const opts = KC.el("div", "opts");

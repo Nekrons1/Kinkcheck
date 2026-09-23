@@ -126,4 +126,8 @@ KC.addLang("ja", "ui", {
   "banner.isOwn": "この端末にあるあなた自身のリストなので、「受け取ったリスト」には追加していません。",
   "banner.saveAs": "名前を付けて保存",
   "toast.savedAs": "「{name}」として受け取ったリストに保存しました",
+  "cmp.yesMaybeOf": "{who}の「OK」と「条件次第」",
+  "cmp.ymTitle": "{who}の「大好き／OK／条件次第」",
+  "cmp.ymSub": "「大好き」、「OK」、「条件次第」の順。",
+  "cmp.noYm": "{who}には「OK」や「条件次第」の項目がありません。",
 });

@@ -30,12 +30,14 @@
   /* one line per person: role, experience, ... */
   function profileLine(name, st) {
     const bits = [];
-    KC.PROFILE.forEach(f => { const v = st.meta[f.id]; if (v) bits.push(esc(KC.i18n.fieldLabel(f.id)) + ": " + esc((Array.isArray(v) ? v : [v]).map(o => KC.i18n.optLabel(f.id, o)).join(", "))); });
+    KC.PROFILE.forEach(f => { const v = !f.hidden && st.meta[f.id]; if (v) bits.push(esc(KC.i18n.fieldLabel(f.id)) + ": " + esc((Array.isArray(v) ? v : [v]).map(o => KC.i18n.optLabel(f.id, o)).join(", "))); });
     return bits.length ? '<div class="cmp-profile"><b>' + esc(name) + "</b> · " + bits.join(" · ") + "</div>" : "";
   }
   function filterBar() {
     const b = (f, label) => '<button class="btn mini' + (FILTER === f ? " on" : "") + '" data-f="' + f + '">' + esc(label) + "</button>";
-    return '<div class="cmp-filter">' + b("all", t("cmp.all")) + b("yesA", t("cmp.yesOf", { who: LAST.nA })) + b("yesB", t("cmp.yesOf", { who: LAST.nB })) + "</div>";
+    return '<div class="cmp-filter">' + b("all", t("cmp.all"))
+      + b("yesA", t("cmp.yesOf", { who: LAST.nA })) + b("yesB", t("cmp.yesOf", { who: LAST.nB }))
+      + b("ymA", t("cmp.yesMaybeOf", { who: LAST.nA })) + b("ymB", t("cmp.yesMaybeOf", { who: LAST.nB })) + "</div>";
   }
 
   /* search: same matching as the form (current-language name + English name) */
@@ -50,11 +52,11 @@
     KC.$("cmpSearchBox").hidden = false;
     const searching = !!KC.$("cmpSearch").value.trim();
     let html = filterBar() + profileLine(LAST.nA, LAST.A) + profileLine(LAST.nB, LAST.B);
-    if (FILTER === "yesA" || FILTER === "yesB") {
-      const side = FILTER === "yesA", who = side ? LAST.nA : LAST.nB;
-      const rows = only(KC.match.yesOf(side ? LAST.A : LAST.B)).map(r => ({ id: r.id, a: (LAST.A.items[r.id] || {}).interest || null, b: (LAST.B.items[r.id] || {}).interest || null }));
-      html += rows.length ? block(t("cmp.yesTitle", { who }), "var(--yes)", t("cmp.yesSub"), rows)
-        : '<div class="result-group"><div class="sub">' + esc(searching ? t("noresults") : t("cmp.noYes", { who })) + "</div></div>";
+    if (FILTER === "yesA" || FILTER === "yesB" || FILTER === "ymA" || FILTER === "ymB") {
+      const side = FILTER === "yesA" || FILTER === "ymA", who = side ? LAST.nA : LAST.nB, wm = FILTER[0] === "y" && FILTER[1] === "m";
+      const rows = only(KC.match.yesOf(side ? LAST.A : LAST.B, wm)).map(r => ({ id: r.id, a: (LAST.A.items[r.id] || {}).interest || null, b: (LAST.B.items[r.id] || {}).interest || null }));
+      html += rows.length ? block(t(wm ? "cmp.ymTitle" : "cmp.yesTitle", { who }), "var(--yes)", t(wm ? "cmp.ymSub" : "cmp.yesSub"), rows)
+        : '<div class="result-group"><div class="sub">' + esc(searching ? t("noresults") : t(wm ? "cmp.noYm" : "cmp.noYes", { who })) + "</div></div>";
     } else {
       const g = KC.match.group(LAST.A, LAST.B);
       Object.keys(g).forEach(k => { g[k] = only(g[k]); });

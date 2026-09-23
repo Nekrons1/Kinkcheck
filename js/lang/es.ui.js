@@ -125,4 +125,8 @@ KC.addLang("es", "ui", {
   "banner.isOwn": "Es tu propia lista de este dispositivo, así que no se ha añadido a «Recibidas».",
   "banner.saveAs": "Guardar como…",
   "toast.savedAs": "Guardada en «Recibidas» como «{name}»",
+  "cmp.yesMaybeOf": "«Sí» y «Quizás» de {who}",
+  "cmp.ymTitle": "«Me encanta / Sí / Quizás» de {who}",
+  "cmp.ymSub": "Primero «Me encanta», luego «Sí», luego «Quizás».",
+  "cmp.noYm": "{who} no marcó ningún «Sí» ni «Quizás».",
 });

@@ -81,6 +81,7 @@
     const meta = {};
     KC.PROFILE.forEach((f, i) => {
       const byte = bytes[i] || 0;
+      if (f.hidden) return;
       if (f.type === "multi") { const arr = []; f.opts.forEach((o, bit) => { if (o && (byte & (1 << bit))) arr.push(o); }); if (arr.length) meta[f.id] = arr; }
       else if (byte > 0 && f.opts[byte - 1]) meta[f.id] = f.opts[byte - 1];
     });

@@ -126,4 +126,8 @@ KC.addLang("en", "ui", {
   "banner.isOwn": "This is your own list from this device, so it was not added to “Received”.",
   "banner.saveAs": "Save as…",
   "toast.savedAs": "Saved under “Received” as “{name}”",
+  "cmp.yesMaybeOf": "“Yes” and “Maybe” from {who}",
+  "cmp.ymTitle": "“Love / Yes / Maybe” from {who}",
+  "cmp.ymSub": "“Love” first, then “Yes”, then “Maybe”.",
+  "cmp.noYm": "{who} has no “Yes” or “Maybe” items.",
 });
