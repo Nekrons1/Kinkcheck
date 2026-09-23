@@ -114,6 +114,11 @@
     extract(text) { text = (text || "").trim(); const i = text.indexOf("#"); return (i >= 0 ? text.slice(i + 1) : text).replace(/^#/, ""); },
     /* identity of a list by CONTENT: decode, then re-encode with the current encoder and no language.
        Links made by older versions (other answer formats, old fields) map to the same key. */
-    key(text) { const st = KC.codec.decode(text); return KC.codec.encode(st); },
+    key(text) {
+      const st = KC.codec.decode(text);
+      /* nothing recognisable inside: never treat two such codes as the same list */
+      if (!Object.keys(st.items).length && !Object.keys(st.meta).length && !st.name) return "raw:" + KC.codec.extract(text);
+      return KC.codec.encode(st);
+    },
   };
 })(window.KC);

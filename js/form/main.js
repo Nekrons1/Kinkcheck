@@ -20,6 +20,10 @@
     if (KC.store.mine.active() === null && !KC.store.isEmpty(F.state)) KC.store.mine.sync(F.state);
   }
 
+  /* a link pasted into an already open tab only changes the #part: the browser does not
+     reload, so nothing would happen. Reload to open it properly. */
+  window.addEventListener("hashchange", () => { if (location.hash.length > 1) location.reload(); });
+
   /* 2. language: link's language wins, then saved choice, then browser */
   KC.i18n.set(KC.i18n.detect(linkLang));
   KC.i18n.mountSwitcher(() => F.renderAll());
@@ -41,6 +45,12 @@
     /* becomes a new own list; the previous one stays in My lists */
     F.viewingShared = false; KC.$("sharedBanner").style.display = "none";
     KC.store.mine.setActive(""); F.saveNow(); KC.toast(t("toast.keep"));
+  });
+  KC.$("bannerSaveAs").addEventListener("click", () => {
+    const nm = prompt(t("prompt.listName"), F.state.name || ""); if (nm === null) return;
+    const item = KC.store.received.saveAs(F.sharedCode, nm);
+    F.receivedResult = { status: "exists", item }; F.renderBanner();
+    KC.toast(KC.i18n.t("toast.savedAs", { name: item.name || t("unnamed") }));
   });
   KC.$("bannerCmp").addEventListener("click", () => {
     F.startCompare(KC.store.ownCode(), KC.codec.encode(F.state, KC.i18n.lang), t("label.mine"), F.state.name || t("label.this"));

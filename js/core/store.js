@@ -36,6 +36,7 @@
         const a = KC.ls.get(KC.KEYS.saved, []) || [];
         const byKey = {}, out = [];
         a.slice().sort((x, y) => (x.ts || 0) - (y.ts || 0)).forEach(x => {
+          if (x.manual) { out.push(x); return; } /* saved on purpose via "Save as": never merged */
           let k; try { k = KC.codec.key(x.code); } catch (e) { k = x.code; }
           const first = byKey[k];
           if (!first) { byKey[k] = x; out.push(x); }
@@ -54,11 +55,18 @@
         const k = KC.codec.key(code);
         const mineKeys = S.mine.list().map(x => { try { return KC.codec.key(KC.codec.encode(S.normalize(x.data))); } catch (e) { return ""; } });
         if ((S.hasOwn() && k === KC.codec.key(S.ownCode())) || mineKeys.indexOf(k) >= 0) return { status: "own" };
-        const a = this.list(); const i = a.findIndex(x => KC.codec.key(x.code) === k);
+        const a = this.list(); const i = a.findIndex(x => !x.manual && KC.codec.key(x.code) === k);
         if (i >= 0) { const item = a.splice(i, 1)[0]; item.ts = Date.now(); a.unshift(item); this.write(a); return { status: "exists", item }; }
         const item = { id: "p" + Date.now(), name: (name || "").trim(), code, ts: Date.now() };
         a.unshift(item); if (a.length > 60) a.length = 60; this.write(a);
         return { status: "added", item };
+      },
+      /* "Save as…": always a new entry with the given name, even if the same content exists */
+      saveAs(code, name) {
+        const a = this.list();
+        const item = { id: "p" + Date.now(), name: (name || "").trim(), code, ts: Date.now(), manual: true };
+        a.unshift(item); if (a.length > 60) a.length = 60; this.write(a);
+        return item;
       },
     },
 

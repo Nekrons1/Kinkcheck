@@ -8,6 +8,7 @@ global.atob = s => Buffer.from(s, "base64").toString("binary");
 const OLD = {}; new Function("OUT", fs.readFileSync(__dirname + "/fixtures/legacy-app-data.js", "utf8") +
   ";OUT.DATA=DATA;OUT.ORDER=ORDER;OUT.encodeState=encodeState;OUT.decodeState=decodeState;")(OLD);
 const LAT = /[^\x00-\x7F]/;
+let lnk0;
 const V371ORDER = (() => { const O = {}; new Function("OUT", fs.readFileSync(__dirname + "/fixtures/legacy-v371-app-data.js", "utf8") + ";OUT.ORDER=ORDER;")(O); return O.ORDER; })();
 const S = (title) => console.log("\n## " + title);
 
@@ -48,6 +49,7 @@ const S = (title) => console.log("\n## " + title);
   // ui key parity
   const src = l => fs.readFileSync(require("./harness").ROOT + "/js/lang/" + l + ".ui.js", "utf8").match(/"([a-zA-Z0-9_.]+)":/g).map(s => s.slice(1, -2));
   const kr = src("ru"), ke = src("en");
+  ["ru", "en", "pt", "es", "ja"].forEach(l => { const ks = src(l); eq(ks.filter((k, i) => ks.indexOf(k) !== i), [], l + ": no duplicate interface keys (a later key would silently overwrite an earlier one)"); });
   eq(kr.filter(k => ke.indexOf(k) < 0), [], "keys in ru missing from en");
   eq(ke.filter(k => kr.indexOf(k) < 0), [], "keys in en missing from ru");
   const kp = src("pt");
@@ -256,6 +258,31 @@ const S = (title) => console.log("\n## " + title);
   eq(rp.d.querySelectorAll("#savedList .saved-row").length, 2, "Received shows the merged list");
   const k1 = KCn.codec.key(oldRec), k2 = KCn.codec.key(KCn.codec.encode(KCn.codec.decode(oldRec), "en"));
   eq(k1 === k2 && k1 !== KCn.codec.key("a=Ag&n=Ns"), true, "key: same content = same key across versions/languages, different content differs");
+
+  /* undecodable old entries must never be merged into one */
+  const junk = JSON.stringify([{ id: "j1", name: "", code: "x=1", ts: 1 }, { id: "j2", name: "", code: "y=2", ts: 2 }, { id: "j3", name: "", code: "#s=abc", ts: 3 }]);
+  let jp = open("form", { storage: { local: { "checklist-saved-profiles-v1": junk }, session: {} } });
+  click(jp.w, jp.d.getElementById("savedBtn"));
+  eq(JSON.parse(jp.w.localStorage.getItem("checklist-saved-profiles-v1")).length, 3, "entries without decodable content are not merged");
+  ok(KCn.codec.key("a=Ag") !== KCn.codec.key("a=Ag&x=1") || KCn.codec.key("a=Ag").indexOf("raw:") === 0, "empty codes get raw keys");
+  // several different unnamed lists all get added one after another
+  let ust = { local: { "practices-checklist-v1": JSON.stringify({ name: "Me", meta: {}, items: { hugging: { interest: "love" } } }) }, session: {} };
+  [["chains", "yes"], ["orgy", "love"], ["rimming", "maybe"], ["tickling", "limit"]].forEach(([id, v]) => {
+    const up = open("form", { hash: V371.enc({ items: { [id]: { interest: v } }, meta: {} }), storage: ust }); ust = up.storage();
+  });
+  eq(JSON.parse(ust.local["checklist-saved-profiles-v1"]).length, 4, "four different unnamed old links -> four Received entries");
+
+  /* banner buttons keep their own labels; "Save as" always saves */
+  let sp = open("form", { hash: lnk0 = KCn.codec.encode({ items: { hugging: { interest: "love" } }, meta: {} }), navLang: "ru",
+    storage: { local: { "checklist-saved-profiles-v1": JSON.stringify([{ id: "pB", name: "Облако", code: KCn.codec.encode({ items: { hugging: { interest: "love" } }, meta: {} }), ts: 1 }]) }, session: {} } });
+  eq([sp.d.getElementById("bannerOwn").textContent, sp.d.getElementById("bannerKeep").textContent, sp.d.getElementById("bannerSaveAs").textContent], ["Открыть мою анкету", "Заполнять как свою", "Сохранить как…"], "banner button labels intact");
+  sp.w.prompt = () => "Лиза"; click(sp.w, sp.d.getElementById("bannerSaveAs"));
+  sp.w.prompt = () => "Маша"; click(sp.w, sp.d.getElementById("bannerSaveAs"));
+  click(sp.w, sp.d.getElementById("savedBtn"));
+  eq([...sp.d.querySelectorAll("#savedList .saved-row b")].map(b => b.textContent), ["Маша", "Лиза", "Облако"], "Save as keeps identical-content lists under different names, not merged");
+  ok(/«Маша»/.test(sp.d.getElementById("toast").textContent), "Save as confirms with a toast");
+  sp = open("form", { hash: lnk0, navLang: "ru", storage: sp.storage() });
+  eq(JSON.parse(sp.w.localStorage.getItem("checklist-saved-profiles-v1")).length, 3, "reopening does not merge manual saves");
 
   /* banner tells honestly what happened with "Received" */
   const lnk = KCn.codec.encode({ items: { hugging: { interest: "love" } }, meta: {} });

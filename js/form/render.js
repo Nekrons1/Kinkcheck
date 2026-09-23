@@ -124,7 +124,7 @@
   /* banner for a list opened from a link: says what happened with "Received" */
   F.renderBanner = function () {
     const r = F.receivedResult || {}, name = r.item && r.item.name;
-    const status = r.status === "own" ? t("banner.own")
+    const status = r.status === "own" ? t("banner.isOwn")
       : r.status === "exists" ? (name ? t("banner.exists", { name: KC.esc(name) }) : t("banner.existsUnnamed"))
       : r.status === "added" ? t("banner.saved") : "";
     KC.$("bannerText").innerHTML = t("banner_html", { status });

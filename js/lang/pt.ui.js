@@ -124,5 +124,7 @@ KC.addLang("pt", "ui", {
   "banner.saved": "Ela foi salva em “Recebidas”.",
   "banner.exists": "Ela já está em “Recebidas” como “{name}” e foi movida para o topo.",
   "banner.existsUnnamed": "Ela já está em “Recebidas” e foi movida para o topo.",
-  "banner.own": "Esta é a sua própria lista deste dispositivo, por isso não foi adicionada a “Recebidas”.",
+  "banner.isOwn": "Esta é a sua própria lista deste dispositivo, por isso não foi adicionada a “Recebidas”.",
+  "banner.saveAs": "Salvar como…",
+  "toast.savedAs": "Salva em “Recebidas” como “{name}”",
 });

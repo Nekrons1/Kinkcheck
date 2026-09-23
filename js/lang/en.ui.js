@@ -123,5 +123,7 @@ KC.addLang("en", "ui", {
   "banner.saved": "It has been saved under “Received”.",
   "banner.exists": "It is already under “Received” as “{name}” and has been moved to the top.",
   "banner.existsUnnamed": "It is already under “Received” and has been moved to the top.",
-  "banner.own": "This is your own list from this device, so it was not added to “Received”.",
+  "banner.isOwn": "This is your own list from this device, so it was not added to “Received”.",
+  "banner.saveAs": "Save as…",
+  "toast.savedAs": "Saved under “Received” as “{name}”",
 });
