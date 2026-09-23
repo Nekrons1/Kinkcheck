@@ -18,6 +18,8 @@
     F.state = KC.store.loadOwn();
     /* first run after update: an existing filled-in list goes into My lists */
     if (KC.store.mine.active() === null && !KC.store.isEmpty(F.state)) KC.store.mine.sync(F.state);
+    /* lists from before list ids existed get one now */
+    if (!F.state.uid && !KC.store.isEmpty(F.state)) F.saveNow();
   }
 
   /* a link pasted into an already open tab only changes the #part: the browser does not
@@ -48,7 +50,7 @@
   KC.$("bannerKeep").addEventListener("click", () => {
     /* becomes a new own list; the previous one stays in My lists */
     F.viewingShared = false; KC.$("sharedBanner").style.display = "none";
-    KC.store.mine.setActive(""); F.saveNow(); KC.toast(t("toast.keep"));
+    KC.store.mine.setActive(""); F.state.uid = KC.store.newUid(); F.saveNow(); KC.toast(t("toast.keep"));
   });
   KC.$("bannerSaveAs").addEventListener("click", () => {
     const nm = prompt(t("prompt.listName"), F.state.name || ""); if (nm === null) return;

@@ -2,7 +2,7 @@
 
    Params:  a = answers (binary, base64url)   m = profile ("About me")
             n = name   s/f/c/l = safeword/fantasies/comments/allergies (free text, not in UI now)
-            lg = language the link opens in
+            lg = language the link opens in   i = 6-char id of the list (tells apart copies with equal content)
    Answers use PERMANENT item codes from data/practices.js, so adding/moving items never
    breaks old links. Two encodings are built and the shorter one is used (leading tag byte):
      2 = sparse: varint(gap*4 + value)                 — best for few marks
@@ -88,6 +88,7 @@
     return meta;
   }
 
+  const UID = /^[A-Za-z0-9_-]{6}$/;
   const TEXT = { n: "name", s: "safeword", f: "fantasies", c: "comments", l: "allergies" };
 
   KC.codec = {
@@ -97,6 +98,7 @@
       const parts = ["a=" + packAnswers(st.items || {})];
       Object.keys(TEXT).forEach(k => { const v = st[TEXT[k]]; if (v) parts.push(k + "=" + encodeURIComponent(v)); });
       const m = packMeta(st.meta); if (m) parts.push("m=" + m);
+      if (st.uid && UID.test(st.uid)) parts.push("i=" + st.uid);
       if (lang) parts.push("lg=" + lang);
       return parts.join("&");
     },
@@ -109,6 +111,7 @@
       Object.keys(TEXT).forEach(k => { st[TEXT[k]] = q.get(k) || ""; });
       if (q.get("m")) st.meta = unpackMeta(q.get("m"));
       const lg = q.get("lg"); if (lg && KC.i18n && KC.i18n.known(lg)) st.lang = lg;
+      const i = q.get("i"); if (i && UID.test(i)) st.uid = i;
       return st;
     },
     /* accept a full URL, "#..." or a bare code */
@@ -118,7 +121,7 @@
     key(text) {
       const st = KC.codec.decode(text);
       /* nothing recognisable inside: never treat two such codes as the same list */
-      if (!Object.keys(st.items).length && !Object.keys(st.meta).length && !st.name) return "raw:" + KC.codec.extract(text);
+      if (!Object.keys(st.items).length && !Object.keys(st.meta).length && !st.name && !st.uid) return "raw:" + KC.codec.extract(text);
       return KC.codec.encode(st);
     },
   };

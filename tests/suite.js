@@ -20,11 +20,11 @@ const S = (title) => console.log("\n## " + title);
   ok(!p.errors.length, "no script errors on load: " + p.errors.join(" | "));
   const ids = [], codes = [];
   KC.CATS.forEach(c => c.items.forEach(([code, id]) => { ids.push(id); codes.push(code); }));
-  eq(ids.length, 406, "item count");
+  eq(ids.length, 413, "item count");
   eq(new Set(ids).size, ids.length, "unique ids"); eq(new Set(codes).size, codes.length, "unique codes");
   const byCode = {}; KC.CATS.forEach(c => c.items.forEach(([code, id]) => byCode[code] = id));
   eq(OLD.ORDER.map((id, i) => byCode[i]), OLD.ORDER, "codes 0..370 still mean the same items as in old versions");
-  eq(Object.keys(byCode).map(Number).sort((a, b) => a - b), [...Array(406).keys()], "codes are 0..405 with no gaps or reuse");
+  eq(Object.keys(byCode).map(Number).sort((a, b) => a - b), [...Array(413).keys()], "codes are 0..412 with no gaps or reuse");
   eq(["furry","xenophilia-tentacles","trampling-barefoot","trampling-shoes","rubber-band-snapping","forced-drinking-beer-cider","irrumatio-to-vomiting","bukkake","cum-in-eyes","nerd-hikikomori","humiliating-body-writing","wax-burns","spitting-in-mouth","snowballing","used-as-toy-for-other-sub","bondage-bag"].map(id => ids.indexOf(id) >= 0), Array(16).fill(true), "16 added items present");
   eq(["sleep-sacks", "bondage-bag", "scarification", "electricity-violet-wand"].map(id => KC.i18n.item(id, "ru").name), ["Спальный мешок", "Бондажный мешок", "Шрамирование", "Электро — вайолет-ванд"], "RU names as requested");
   eq(KC.CATS.find(c => c.id === "marking").items.some(([, id]) => id === "wax-burns"), true, "wax burns under marking");
@@ -35,6 +35,8 @@ const S = (title) => console.log("\n## " + title);
   eq(KC.CATS.find(c => c.id === "fetishes").items.some(([, id]) => id === "clowncore"), true, "Clowncore under fetishes");
   eq(["ru", "en"].map(l => KC.i18n.item("foot-worship", l).name), ["Футфетиш", "Foot fetish"], "foot worship renamed to foot fetish");
   ok(!KC.PROFILE.filter(f => !f.hidden).some(f => f.id === "orient"), "orientation retired from the profile");
+  const where = id => (KC.CATS.find(c => c.items.some(([, x]) => x === id)) || {}).id;
+  eq(["squirting","underwear-sniffing","wearing-partners-underwear","hand-feeding","masks","blind-stranger","period-play"].map(where), ["fetishes","fetishes","fetishes","fetishes","fetishes","role-play","bodily-fluids"], "7 new practices in their sections");
   eq(["harness-leather", "harness-rope"].map(id => KC.i18n.item(id, "ru").name), ["Харнесс кожаный", "Харнесс верёвочный"], "RU: harness, not «упряжь»");
   eq(KC.CATS.find(c => c.id === "fetishes").items.some(([, id]) => id === "nerd-hikikomori") && KC.CATS.find(c => c.id === "marking").items.some(([, id]) => id === "humiliating-body-writing"), true, "new items in the requested sections");
   ["ru", "en", "pt", "es", "ja"].forEach(l => {
@@ -51,7 +53,7 @@ const S = (title) => console.log("\n## " + title);
     eq(miss.length, 0, l + ": every item has name+hint (" + miss.slice(0, 3) + ")");
     const mc = KC.CATS.filter(c => !KC.i18n._pick("cats", c.id, l)); eq(mc.length, 0, l + ": every category named");
   });
-  const enNames = ids.map(id => KC.i18n.item(id, "en").name); eq(new Set(enNames).size, 406, "EN names unique");
+  const enNames = ids.map(id => KC.i18n.item(id, "en").name); eq(new Set(enNames).size, 413, "EN names unique");
   const enCyr = ids.filter(id => LAT.test(KC.i18n.item(id, "en").desc.replace(/[’“”–—…]/g, ""))); eq(enCyr, [], "EN hints contain no Cyrillic");
   // ui key parity
   const src = l => fs.readFileSync(require("./harness").ROOT + "/js/lang/" + l + ".ui.js", "utf8").match(/"([a-zA-Z0-9_.]+)":/g).map(s => s.slice(1, -2));
@@ -93,7 +95,7 @@ const S = (title) => console.log("\n## " + title);
   p = open("form", { navLang: "ru" });
   let { w, d } = p;
   eq(p.KC.i18n.lang, "ru", "RU browser -> RU page");
-  eq(d.querySelectorAll(".item").length, 406, "406 rows rendered");
+  eq(d.querySelectorAll(".item").length, 413, "413 rows rendered");
   ok(d.querySelector(".brand-row #langSw"), "language switcher sits in the title row");
   const dotted = [...d.querySelectorAll(".item .new-dot")].map(x => x.closest(".item").dataset.id).sort();
   const newer = []; p.KC.CATS.forEach(c => c.items.forEach(([code, id]) => { if (code >= 371) newer.push(id); }));
@@ -121,7 +123,7 @@ const S = (title) => console.log("\n## " + title);
   let saved = JSON.parse(w.localStorage.getItem("practices-checklist-v1"));
   eq(saved.items, { hugging: { interest: "love" }, "spanking-hand": { interest: "maybe" }, "fisting-anal": { interest: "limit" }, "impact-bruising": { interest: "yes" } }, "answers saved (toggle-off removed)");
   eq(saved.meta, { role: "sub", exp: "medium", rel: "poly", attire: ["lace", "leather"] }, "profile saved as keys");
-  eq(d.getElementById("progress").textContent, "Отмечено 4 из 406 практик", "progress text");
+  eq(d.getElementById("progress").textContent, "Отмечено 4 из 413 практик", "progress text");
   const link = p.KC.form.shareLink();
   ok(/[#&]lg=ru(&|$)/.test(link), "share link carries lg=ru");
   ok(/[#&]m=/.test(link), "share link carries profile (m=)");
@@ -143,7 +145,7 @@ const S = (title) => console.log("\n## " + title);
   ok(d.querySelector('#roleTop .opt[data-val="sub"]').getAttribute("aria-pressed") === "true", "role survived switch");
   eq(d.querySelector('#roleTop .opt[data-val="sub"]').textContent, "Submissive / Bottom", "role label translated");
   eq(d.getElementById("metaName").value, "Андрей", "name survived switch");
-  eq(d.getElementById("progress").textContent, "4 of 406 practices marked", "EN progress");
+  eq(d.getElementById("progress").textContent, "4 of 413 practices marked", "EN progress");
   eq(d.getElementById("shareBtn").textContent, "Share", "header translated");
   eq(d.documentElement.lang, "en", "<html lang> updated");
   ok(/lg=en/.test(p.KC.form.shareLink()), "link now carries lg=en");
@@ -156,7 +158,7 @@ const S = (title) => console.log("\n## " + title);
   ok(row("hugging").querySelector('.scale button[data-v="love"]').classList.contains("sel"), "answer survived switch to PT");
   eq(row("hugging").querySelector('.scale button[data-v="love"]').textContent, "Adoro", "PT scale");
   eq(d.querySelector('#roleTop .opt[data-val="sub"]').textContent, "Submisso(a) / Bottom", "PT role label");
-  eq(d.getElementById("progress").textContent, "4 de 406 práticas marcadas", "PT progress");
+  eq(d.getElementById("progress").textContent, "4 de 413 práticas marcadas", "PT progress");
   const ptHash = p.KC.form.shareLink().split("#")[1];
   ok(/lg=pt/.test(ptHash), "PT link carries lg=pt");
   eq(open("form", { hash: ptHash, storage: { local: { "checklist-lang": "ru" }, session: {} } }).KC.i18n.lang, "pt", "PT link opens in PT");
@@ -319,7 +321,7 @@ const S = (title) => console.log("\n## " + title);
   eq(Object.entries(gp.KC.form.state.items).filter(([id]) => ids.indexOf(id) >= 0).sort(), [["cbt", { interest: "limit" }], ["hugging", { interest: "love" }], ["knife-play", { interest: "maybe" }], ["orgy", { interest: "yes" }], ["puppy-play", { interest: "yes" }]], "old ids moved to current items; current answer wins");
   ok(gp.d.querySelector('.item[data-id="puppy-play"] .scale button[data-v="yes"]').classList.contains("sel"), "moved answer is visible on the page");
   const gShown = gp.d.querySelectorAll(".scale button.sel").length, gLink = Object.keys(KCn.codec.decode(gp.KC.form.shareLink()).items).length;
-  eq(gp.d.getElementById("progress").textContent, "Отмечено " + gShown + " из 406 практик", "counter = what is shown");
+  eq(gp.d.getElementById("progress").textContent, "Отмечено " + gShown + " из 413 практик", "counter = what is shown");
   eq(gLink, gShown, "link contains exactly what the counter says");
   Object.keys(KC.ID_ALIASES).forEach(k => { if (ids.indexOf(KC.ID_ALIASES[k]) < 0) ok(false, "alias target missing: " + k); });
 
@@ -349,7 +351,70 @@ const S = (title) => console.log("\n## " + title);
   const srt = o => Object.entries(o).sort();
   eq(srt(KCn.codec.decode(KCn.codec.encode(withNew)).items), srt(withNew.items), "link with new items round-trips");
   const allNew = {}; KCn.CATS.forEach(c => c.items.forEach(([, id], i) => allNew[id] = { interest: vals[i % 4] }));
-  eq(Object.keys(KCn.codec.decode(KCn.codec.encode({ items: allNew, meta: {} })).items).length, 406, "fully filled 406-item link round-trips");
+  eq(Object.keys(KCn.codec.decode(KCn.codec.encode({ items: allNew, meta: {} })).items).length, 413, "fully filled 413-item link round-trips");
+
+  /* form: "Show" filter */
+  S("Show filter");
+  p = open("form", { navLang: "ru", storage: { local: { "practices-checklist-v1": JSON.stringify({ name: "", meta: {}, items: { hugging: { interest: "love" }, furry: { interest: "yes" } } }) }, session: {} } });
+  const vis = () => [...p.d.querySelectorAll(".item:not(.filtered-out)")].map(r => r.dataset.id);
+  const vsel = p.d.getElementById("view");
+  eq([...vsel.options].map(o => o.textContent), ["Все пункты", "Только без ответа", "Только новые"], "Show menu labels");
+  vsel.value = "unanswered"; vsel.dispatchEvent(new p.w.Event("change"));
+  eq([vis().length, vis().indexOf("hugging"), vis().indexOf("furry")], [411, -1, -1], "unanswered: answered items hidden");
+  click(p.w, p.d.querySelector('.item[data-id="chains"] .scale button[data-v="yes"]'));
+  ok(vis().indexOf("chains") >= 0, "a row just answered stays visible until the filter is re-applied");
+  vsel.dispatchEvent(new p.w.Event("change")); ok(vis().indexOf("chains") < 0, "re-applying hides it");
+  vsel.value = "new"; vsel.dispatchEvent(new p.w.Event("change"));
+  const newIds = []; p.KC.CATS.forEach(c => c.items.forEach(([code, id]) => { if (code >= 371) newIds.push(id); }));
+  eq(vis().sort(), newIds.sort(), "new: exactly the green-dot items (" + newIds.length + ")");
+  const sb = p.d.getElementById("search"); sb.value = "секс"; sb.dispatchEvent(new p.w.Event("input"));
+  ok(vis().length > 0 && vis().every(id => newIds.indexOf(id) >= 0), "search combines with the filter");
+  sb.value = ""; vsel.value = "all"; vsel.dispatchEvent(new p.w.Event("change")); eq(vis().length, 413, "all items again");
+
+  /* backup */
+  S("Backup");
+  p = open("form", { storage: own });
+  const bk = p.KC.store.exportAll();
+  ok(bk.app === "kinkcheck" && bk.mine.length >= 1 && Array.isArray(bk.received), "export contains my lists and received");
+  let q = open("form", { storage: { local: { "checklist-saved-profiles-v1": JSON.stringify([{ id: "zz", name: "Other", code: "a=Ag&n=O", ts: 1 }]) }, session: {} } });
+  const res = q.KC.store.importAll(JSON.parse(JSON.stringify(bk)));
+  eq([res.mine, res.received >= 0], [bk.mine.length, true], "import adds my lists");
+  ok(JSON.parse(q.w.localStorage.getItem("checklist-saved-profiles-v1")).some(x => x.id === "zz"), "import keeps existing received lists");
+  ok(q.KC.store.loadOwn().name === JSON.parse(own.local["practices-checklist-v1"]).name, "empty device takes the backup's current list");
+  eq(q.KC.store.importAll(JSON.parse(JSON.stringify(bk))).mine, 0, "importing twice adds nothing");
+  eq(q.KC.store.importAll({ foo: 1 }), null, "non-backup file rejected");
+
+  /* list id in links */
+  S("List id");
+  p = open("form", { storage: own });
+  const l1 = p.KC.form.shareLink(); const u1 = p.KC.codec.decode(l1).uid;
+  ok(/^[A-Za-z0-9_-]{6}$/.test(u1) && /&i=[A-Za-z0-9_-]{6}(&|$)/.test(l1), "share link carries a 6-char id");
+  eq(p.KC.codec.decode(p.KC.form.shareLink()).uid, u1, "the id is stable");
+  eq(KCn.codec.decode(KCn.codec.encode({ items: {}, meta: {}, uid: "bad id!" })).uid, undefined, "invalid ids are ignored");
+  // two friends with identical content but different ids -> two Received entries
+  const same = { items: { hugging: { interest: "love" } }, meta: {} };
+  let rs = { local: {}, session: {} };
+  ["AAAAAA", "BBBBBB"].forEach(uid => { const r = open("form", { hash: KCn.codec.encode(Object.assign({ uid }, same)), storage: rs }); rs = r.storage(); });
+  eq(JSON.parse(rs.local["checklist-saved-profiles-v1"]).length, 2, "same content, different ids -> kept apart");
+  // same id, new answers -> updated in place
+  let r2 = open("form", { navLang: "ru", hash: KCn.codec.encode({ uid: "AAAAAA", items: { hugging: { interest: "love" }, chains: { interest: "yes" } }, meta: {} }), storage: rs });
+  let rl = JSON.parse(r2.w.localStorage.getItem("checklist-saved-profiles-v1"));
+  eq([rl.length, KCn.codec.decode(rl[0].code).uid, Object.keys(KCn.codec.decode(rl[0].code).items).length], [2, "AAAAAA", 2], "newer version of the same list replaces the old one");
+  ok(/новая версия анкеты/.test(r2.d.getElementById("bannerText").textContent), "banner says it was updated");
+  // own list recognised by id even after its answers changed
+  r2 = open("form", { navLang: "ru", hash: KCn.codec.encode({ uid: u1, items: { chains: { interest: "love" } }, meta: {} }), storage: p.storage() });
+  ok(/ваша собственная анкета/.test(r2.d.getElementById("bannerText").textContent), "own list recognised by its id");
+  // "Use as my own" and "Save a copy" give new ids
+  r2 = open("form", { hash: KCn.codec.encode({ uid: "CCCCCC", items: { orgy: { interest: "yes" } }, meta: {} }) });
+  click(r2.w, r2.d.getElementById("bannerKeep"));
+  ok(r2.KC.form.state.uid && r2.KC.form.state.uid !== "CCCCCC", "'Use as my own' gets a new id");
+  r2.w.prompt = () => "copy"; click(r2.w, r2.d.getElementById("mineSaveNew"));
+  const mcopy = JSON.parse(r2.w.localStorage.getItem("checklist-my-profiles-v1")).find(x => x.name === "copy");
+  ok(mcopy && mcopy.data.uid && mcopy.data.uid !== r2.KC.form.state.uid, "a saved copy gets its own id");
+  // old lists without id get one on first run
+  r2 = open("form", { storage: { local: { "practices-checklist-v1": JSON.stringify({ name: "Old", meta: {}, items: { hugging: { interest: "yes" } } }) }, session: {} } });
+  ok(/^[A-Za-z0-9_-]{6}$/.test(JSON.parse(r2.w.localStorage.getItem("practices-checklist-v1")).uid), "existing list without id gets one");
+  ok(l1.split("#")[1].length - KCn.codec.encode(Object.assign({}, KCn.codec.decode(l1), { uid: undefined }), "ru").length === 9, "id adds exactly 9 characters (&i=XXXXXX)");
 
   /* ---------- 7. My lists ---------- */
   S("My lists");
@@ -455,7 +520,55 @@ const S = (title) => console.log("\n## " + title);
   c = open("compare", { storage: hand.storage() });
   eq(c.d.getElementById("nameB").value, "Boris", "hand-off fills B"); ok(c.d.querySelectorAll(".result-group").length > 0, "hand-off auto-compares");
   eq(c.w.sessionStorage.getItem("cmpA"), null, "hand-off data consumed");
-  c = open("compare"); click(c.w, c.d.getElementById("cmpBtn")); eq(c.d.getElementById("toast").textContent, "Вставьте обе ссылки", "empty compare warns");
+  c = open("compare"); click(c.w, c.d.getElementById("cmpBtn")); eq(c.d.getElementById("toast").textContent, "Нужно минимум две анкеты", "empty compare warns");
+
+  S("group compare");
+  const people = [
+    { name: "Anna", items: { hugging: { interest: "love" }, chains: { interest: "yes" }, orgy: { interest: "yes" }, cbt: { interest: "limit" } } },
+    { name: "Boris", items: { hugging: { interest: "yes" }, chains: { interest: "love" }, orgy: { interest: "maybe" }, cbt: { interest: "yes" } } },
+    { name: "Kira", items: { hugging: { interest: "love" }, chains: { interest: "yes" }, orgy: { interest: "yes" }, cbt: { interest: "yes" } } }];
+  const recG = people.map((x, i) => ({ id: "g" + i, name: x.name, code: KCn.codec.encode({ items: x.items, meta: {}, name: x.name }), ts: 10 - i }));
+  let gc = open("compare", { navLang: "ru", storage: { local: { "checklist-saved-profiles-v1": JSON.stringify(recG) }, session: {} } });
+  eq(gc.d.querySelectorAll("#parts .cmp-col").length, 2, "starts with two participants");
+  click(gc.w, gc.d.getElementById("addPart"));
+  eq(gc.d.querySelectorAll("#parts .cmp-col").length, 3, "add participant");
+  const cols = [...gc.d.querySelectorAll("#parts .cmp-col")];
+  const pick = (col, i) => { const sel = col.querySelector(".cmp-pick"); sel.value = "r:g" + i; sel.dispatchEvent(new gc.w.Event("change", { bubbles: true })); };
+  ok([...cols[0].querySelectorAll(".cmp-pick optgroup")].some(g => g.label === "Полученные"), "picker lists Received");
+  cols.forEach((c, i) => pick(c, i));
+  eq(cols.map(c => c.querySelector(".cmp-name").value), ["Anna", "Boris", "Kira"], "picker fills name and link");
+  click(gc.w, gc.d.getElementById("cmpBtn"));
+  const gt = () => [...gc.d.querySelectorAll(".rrow")].map(r => r.dataset && r.querySelector(".nm").firstChild.textContent);
+  eq(gt(), ["Объятия", "Сковывание цепями"], "«Да/Обожаю» у всех: only items everyone likes (orgy has a maybe, cbt a No)");
+  ok(/Anna: .*Boris: .*Kira:/.test(gc.d.querySelector(".rrow .who").textContent), "row shows every participant");
+  click(gc.w, gc.d.querySelector('button[data-f="pairs"]'));
+  const cells = [...gc.d.querySelectorAll(".pair-table button.pair-n")].map(b => b.dataset.pair + "=" + b.textContent);
+  eq([...new Set(cells)].sort(), ["0,1=2", "0,2=3", "1,2=3"], "pair table counts matches per pair");
+  // roles: Top + Bottom only
+  const withRoles = [["Anna", "dom"], ["Boris", "sub"], ["Kira", "sub"], ["Lev", ""]].map(([n, r], i) => ({ id: "h" + i, name: n, code: KCn.codec.encode({ items: people[i % 3].items, meta: r ? { role: r } : {}, name: n }), ts: 10 - i }));
+  let rc = open("compare", { navLang: "ru", storage: { local: { "checklist-saved-profiles-v1": JSON.stringify(withRoles) }, session: {} } });
+  click(rc.w, rc.d.getElementById("addPart")); click(rc.w, rc.d.getElementById("addPart"));
+  [...rc.d.querySelectorAll("#parts .cmp-col")].forEach((c, i) => { const sel = c.querySelector(".cmp-pick"); sel.value = "r:h" + i; sel.dispatchEvent(new rc.w.Event("change", { bubbles: true })); });
+  click(rc.w, rc.d.getElementById("cmpBtn")); click(rc.w, rc.d.querySelector('button[data-f="pairs"]'));
+  const pairsNow = () => [...new Set([...rc.d.querySelectorAll(".pair-table button.pair-n")].map(b => b.dataset.pair))].sort();
+  eq(pairsNow(), ["0,1", "0,2", "0,3", "1,2", "1,3", "2,3"], "all pairs by default");
+  ok(/Верх/.test(rc.d.querySelector(".pair-table").textContent) && /Низ/.test(rc.d.querySelector(".pair-table").textContent), "roles shown under names");
+  click(rc.w, rc.d.querySelector('button[data-pm="role"]'));
+  eq(pairsNow(), ["0,1", "0,2"], "Top + Bottom only: Anna(Top) with Boris/Kira(Bottom); no Bottom+Bottom, no pairs without a role");
+  ok(/Роль не указана: Lev/.test(rc.d.getElementById("results").textContent), "participants without a role are listed");
+  ok(/\(2\)/.test(rc.d.querySelector(".result-group h3").textContent), "header counts shown pairs");
+  click(rc.w, rc.d.querySelector('button[data-pm="any"]')); eq(pairsNow().length, 6, "back to all pairs");
+  click(gc.w, gc.d.querySelector('.pair-table button[data-pair="0,2"]'));
+  ok(/Совпадения — оба «за»/.test(gc.d.getElementById("results").textContent) && gc.d.querySelector('button[data-f="group"]'), "number opens the detailed pair view with a way back");
+  click(gc.w, gc.d.querySelector('button[data-f="group"]'));
+  ok(gc.d.querySelector(".pair-table"), "back to the group view");
+  click(gc.w, gc.d.querySelector('#parts .cmp-col:last-child [data-act="rm"]'));
+  eq(gc.d.querySelectorAll("#parts .cmp-col").length, 2, "remove participant");
+  ok(gc.d.querySelectorAll('#parts [data-act="rm"]:not([hidden])').length === 0, "cannot go below two");
+  for (let i = 0; i < 12; i++) click(gc.w, gc.d.getElementById("addPart"));
+  eq(gc.d.querySelectorAll("#parts .cmp-col").length, 10, "at most ten participants");
+  click(gc.w, gc.d.querySelector('#langSw button[data-lang="en"]'));
+  ok(/Participant 3/.test(gc.d.querySelectorAll("#parts .cmp-name")[2].placeholder), "participant labels translated");
 
   /* ---------- 9. PDF sheet ---------- */
   S("PDF sheet");
@@ -484,7 +597,7 @@ const S = (title) => console.log("\n## " + title);
   eq(p.d.querySelector('.item[data-id="face-sitting"] .main').textContent, "顔面騎乗", "JA name");
   eq(p.d.querySelector('.item[data-id="face-sitting"] .sub').textContent, "Face-sitting", "JA page shows English subtitle");
   eq(p.d.querySelector('.item[data-id="hugging"] .scale button.sel').textContent, "大好き", "JA scale + answer");
-  eq(p.d.getElementById("progress").textContent, "406項目中 4項目にチェック済み", "JA progress");
+  eq(p.d.getElementById("progress").textContent, "413項目中 4項目にチェック済み", "JA progress");
   ok(/lg=ja/.test(p.KC.form.shareLink()), "JA link carries lg=ja");
   ok(/ハードリミット/.test(p.KC.form.buildSheet().textContent), "JA PDF sheet");
   const js = p.d.getElementById("search"); js.value = "鞭"; js.dispatchEvent(new p.w.Event("input"));
