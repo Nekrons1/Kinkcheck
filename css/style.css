@@ -361,3 +361,181 @@ input.bad{border-color:var(--limit)!important;background:var(--limit-bg)}
   .top-actions{gap:4px}
   .top-actions .btn{font-size:11px;padding:7px 4px}
 }
+/* seven languages: keep the switcher on the title line on narrow phones */
+@media (max-width:480px){
+  .brand-row .brand{font-size:15px}
+  .lang-btn{padding:5px 4px;font-size:10.5px}
+}
+/* Thai has marks above and below the line: a bit more line height in compact buttons */
+html[lang="th"] .top-actions .btn, html[lang="th"] .lang-btn{line-height:1.35}
+/* Traditional Chinese: Taiwanese system fonts first, so Han characters get Traditional glyph shapes */
+html[lang="zh-Hant"] body{font-family:Inter,"PingFang TC","Microsoft JhengHei","Noto Sans TC","Noto Sans CJK TC",system-ui,sans-serif}
+
+/* ---------- favourites (♥), filter panel, templates ---------- */
+.mini.fav{width:29px;padding:6px 0;text-align:center;font-size:14px;line-height:1;color:var(--muted);opacity:.6}
+.mini.fav:hover{opacity:1}
+.mini.fav.on{opacity:1;color:var(--love);border-color:var(--love);background:var(--love-bg)}
+/* search row: [search][Section][Filters ▾][♥]; "Filters" folds out template + "Show" */
+.subbar .search{flex:1 1 180px;min-width:120px}
+.subbar #jump{flex:0 1 190px;max-width:none;min-width:0}
+.subbar .filt-btn{flex:0 0 auto;padding:8px 12px;font-size:14px;white-space:nowrap}
+.subbar .filt-btn::after{content:" ▾";font-size:11px}
+.subbar .filt-btn[aria-expanded="true"]::after{content:" ▴"}
+.subbar .filt-btn.on{border-color:var(--accent);color:var(--accent)}
+.filt-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-left:5px;vertical-align:middle;position:relative;top:-1px}
+.filt-dot[hidden]{display:none}
+/* "only favourites": a heart toggle (the checkbox itself is visually hidden) */
+.fav-toggle{flex:0 0 auto;position:relative;display:inline-flex;align-items:center;justify-content:center;width:40px;height:38px;border-radius:9px;border:1px solid var(--line);background:var(--panel);color:var(--muted);font-size:17px;cursor:pointer;user-select:none}
+.fav-toggle input{position:absolute;opacity:0;width:1px;height:1px;margin:0;pointer-events:none}
+.fav-toggle:hover{border-color:var(--love)}
+.fav-toggle.on{color:var(--love);border-color:var(--love);background:var(--love-bg)}
+.fav-toggle:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.filt-bar{flex-basis:100%;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--panel)}
+.filt-bar[hidden]{display:none}
+.filt-row{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--muted);flex:1 1 250px;min-width:0}
+.filt-row > span{white-space:nowrap}
+.filt-row select{font:inherit;font-size:14px;padding:7px 8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);flex:1 1 auto;min-width:0;max-width:100%}
+/* note above the list while a template is on */
+.tpl-note{background:var(--accent-soft);border:1px solid var(--accent);border-radius:10px;padding:10px 13px;margin:16px 0 0;font-size:13px;line-height:1.5;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.tpl-note[hidden]{display:none}
+.tpl-note span{flex:1 1 240px}
+.banner .banner-tpl{display:block;margin-top:6px}
+/* share window: which link is shown + template block */
+.share-note{color:var(--accent)!important;font-weight:500}
+.share-note[hidden]{display:none}
+.share-kind{font-size:12.5px;font-weight:600;color:var(--ink);margin:0 0 6px}
+.tpl-share{border-top:1px solid var(--line2);margin-top:14px;padding-top:12px}
+.tpl-share h4, .sub-h{font-family:Fraunces,Georgia,serif;font-size:17px;margin:0 0 2px}
+.tpl-share input{width:100%;font:inherit;padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);margin-bottom:3px}
+.tpl-share input.bad{border-color:var(--limit);outline:1px solid var(--limit)}
+.tpl-hint{font-size:11.5px;color:var(--muted);margin:0 0 8px}
+.tpl-hint.warn{animation:kc-hint 1.8s ease-out forwards}
+@keyframes kc-hint{0%,70%{color:var(--limit);font-weight:600}100%{color:var(--muted);font-weight:400}}
+.tpl-share .row{display:flex;gap:8px;flex-wrap:wrap}
+.tpl-share .row .btn{flex:1 1 170px}
+.tpl-share #shareBack{margin-top:8px}
+.tpl-share #shareBack[hidden]{display:none}
+.sub-h{margin-top:18px;border-top:1px solid var(--line2);padding-top:12px}
+.modal p.sub-p{margin:2px 0 6px}
+#resetFav:disabled{opacity:.45;cursor:default}
+#pdfOverlay .only-toggle{font-size:14px;margin-top:6px}
+/* phones: one row [search][Section][Filters][♥]; very narrow phones: search gets its own row */
+@media (max-width:560px){
+  .subbar .search{order:1;flex:1 1 100px;min-width:0}
+  .subbar #jump{order:2;flex:0 1 100px;padding:8px 6px;font-size:14px}
+  .subbar .filt-btn{order:3;padding:8px 8px;font-size:13px}
+  .subbar .fav-toggle{order:4;width:38px}
+  .subbar .filt-bar{order:5;padding:7px 8px}
+  .filt-row{flex-basis:100%}
+}
+/* 350–370 px: still one row, everything a bit tighter */
+@media (max-width:370px){
+  .subbar{gap:6px}
+  .subbar .search{flex:1 1 90px}
+  .subbar .search input{padding-left:30px}
+  .subbar .search svg{left:9px}
+  .subbar #jump{flex:0 1 84px;padding:8px 4px;font-size:13px}
+  .subbar .filt-btn{padding:8px 6px;font-size:12.5px}
+  .subbar .fav-toggle{width:34px}
+}
+/* narrower than 350 px: search gets its own row */
+@media (max-width:349px){
+  .subbar .search{flex-basis:100%}
+  .subbar #jump{flex:1 1 40%}
+}
+/* narrow phones: ♥ + ? + the scale stay on one line */
+@media (max-width:370px){
+  .item-controls{gap:4px}
+  .mini.fav, .mini.help{width:26px}
+  .scale button{padding:7px 6px}
+}
+
+/* ---------- help "?", help window, notice after a template link, template rows ---------- */
+.help-q{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;padding:0;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--muted);font:600 12.5px/1 Inter,Arial,sans-serif;cursor:pointer;vertical-align:middle}
+.help-q:hover{border-color:var(--accent);color:var(--accent)}
+.help-q:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.brand-row .help-q{margin-left:-2px}
+.modal h3 .help-q, .modal h4 .help-q{position:relative;top:-2px;margin-left:4px}
+.filt-bar .help-q{margin-left:auto}
+.tpl-note .help-q{margin-left:-4px}
+.help-modal{max-width:560px}
+.help-toc{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 6px}
+.help-toc .btn.mini{padding:4px 9px;font-size:12px}
+.help-body section{border-top:1px solid var(--line2);padding-top:10px;margin-top:12px;scroll-margin-top:8px}
+.help-body h4{font-family:Fraunces,Georgia,serif;font-size:17px;margin:0 0 4px}
+.help-body p, .help-body li{font-size:13.5px;line-height:1.55;color:var(--ink)}
+.help-body p{margin:4px 0 8px}
+.help-body ul{margin:4px 0 6px;padding-left:20px}
+.help-body li{margin:3px 0}
+.notice-bar{background:var(--yes-bg);border:1px solid var(--yes);border-radius:10px;padding:12px 15px;margin:16px 0 0;font-size:13px;line-height:1.5;color:var(--ink)}
+.notice-bar[hidden]{display:none}
+.notice-bar .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.notice-bar .row [hidden]{display:none}
+/* template rows: name + count on top, the four buttons under it */
+.saved-row.tpl-row{flex-wrap:wrap;row-gap:6px}
+.saved-row.tpl-row .meta{flex:1 1 100%}
+.saved-row.tpl-row .acts{flex:1 1 100%;justify-content:flex-start}
+#mineTplSave[hidden]{display:none}
+@media (max-width:560px){
+  .brand-row .help-q{width:20px;height:20px;font-size:11.5px}
+}
+/* phones: title + "?" + languages share one line; a long title is cut with "…" instead of wrapping
+   (flex wraps before it shrinks, so the title gets a max width: row minus languages, "?" and gaps) */
+@media (max-width:560px){
+  .brand-row .brand{max-width:calc(100% - 254px)}
+}
+/* seven languages: switcher is ~171px at ≤480px, ~160px at ≤370px */
+@media (max-width:480px){
+  .brand-row .brand{max-width:calc(100% - 208px)}
+}
+@media (max-width:370px){
+  .lang-btn{padding:5px 3px}
+  .brand-row .brand{max-width:calc(100% - 196px)}
+}
+/* phones: the row must fit "Filters" with its dot next to ♥ — flex wraps before it shrinks, so keep the bases small */
+@media (max-width:560px){
+  .subbar .search{flex:1 1 60px}
+  .subbar #jump{flex:0 1 92px}
+}
+@media (max-width:349px){
+  .subbar #jump{flex:1 1 60px}
+}
+
+/* ---------- search row v557: [search][Section][Template…][All items][♥] ---------- */
+/* search and Section are short on purpose: words are short, and the opened list is wider than the closed one */
+.subbar .search{flex:1 1 150px;max-width:260px;min-width:110px}
+.subbar #jump{flex:0 1 150px;max-width:none}
+.subbar #tplSel{flex:0 1 180px;min-width:0}
+.subbar #view{flex:0 1 180px;min-width:0}
+.subbar #tplSel[hidden]{display:none}
+/* a list that filters something now is highlighted (like ♥) */
+.subbar select.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);font-weight:600}
+/* phones: row 1 = search, Section, ♥; row 2 = Template…, All items */
+@media (max-width:560px){
+  .subbar{gap:6px}
+  .subbar .search{order:1;flex:1 1 100px;max-width:none;min-width:0}
+  .subbar #jump{order:2;flex:0 1 112px;padding:8px 6px;font-size:14px}
+  .subbar .fav-toggle{order:3;width:38px}
+  .subbar #tplSel{order:4;flex:1 1 40%;padding:8px 6px;font-size:14px}
+  .subbar #view{order:5;flex:1 1 40%;padding:8px 6px;font-size:14px}
+}
+@media (max-width:349px){
+  .subbar .search{flex:1 1 90px}
+  .subbar #jump{flex:0 1 96px}
+}
+/* a list that filters something: a small accent dot inside it instead of a coloured field (owner: the filled
+   field was a loud colour patch). The dot is a background, so the native list keeps working everywhere. */
+.subbar #tplSel.on, .subbar #view.on{border-color:var(--line);color:var(--ink);font-weight:400;
+  background:var(--panel) radial-gradient(circle, var(--accent) 0 3.5px, transparent 4px) no-repeat 10px 50% / 10px 10px;
+  padding-left:26px}
+/* "Share the current template «X»": full width like the buttons under it */
+.tpl-share .tpl-cur{display:block;width:100%;margin:0 0 8px}
+.tpl-share .tpl-cur[hidden]{display:none}
+/* the header lists may take the whole second row on phones (old select.jump max-width no longer applies) */
+.subbar #tplSel, .subbar #view{max-width:none}
+
+/* ---------- saved comparisons (3+ people) ---------- */
+.cmp-saved{width:100%;font:inherit;font-size:14px;padding:9px 10px;margin:16px 0 0;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.cmp-savebar{margin:12px 0 10px}
+.cmp-savebar .btn{width:100%}
+.cmp-savednote{margin:-2px 0 10px}

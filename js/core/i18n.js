@@ -14,6 +14,8 @@
     es: { label: "ES", name: "Español",   locale: "es-ES", enabled: true  },
     ja: { label: "JA", name: "日本語",     locale: "ja-JP", enabled: true  },
     pt: { label: "PT", name: "Português (Brasil)", locale: "pt-BR", enabled: true  },
+    th: { label: "TH", name: "ไทย",       locale: "th-TH", enabled: true  },
+    zh: { label: "ZH", name: "繁體中文",   locale: "zh-TW", enabled: true, html: "zh-Hant" },  // html: <html lang> so browsers pick Traditional glyphs
   };
   const DEFAULT = "ru";          // for visitors whose browser language is not enabled
   const FALLBACK = ["en", "ru"]; // missing text -> try these packs
@@ -32,7 +34,7 @@
     enabled: () => Object.keys(LANGS).filter(l => LANGS[l].enabled),
     get lang() { return cur; },
     locale:  () => LANGS[cur].locale,
-    set(l) { cur = I.usable(l) ? l : (I.known(l) ? "en" : DEFAULT); document.documentElement.lang = cur; return cur; },
+    set(l) { cur = I.usable(l) ? l : (I.known(l) ? "en" : DEFAULT); document.documentElement.lang = LANGS[cur].html || cur; return cur; },
     persist(l) { KC.ls.setRaw(KC.KEYS.lang, l); },
 
     /* order: link language -> ?lang= -> saved choice -> browser -> default */
@@ -64,6 +66,8 @@
     has(part, id, lang) { const p = packs[lang]; return !!(p && p[part][id] != null); },
     /* ids of the list that the current language does not translate (shown in English instead) */
     missing() { const out = []; KC.CATS.forEach(c => c.items.forEach(([, id]) => { if (!I.has("items", id, cur)) out.push(id); })); return out; },
+    /* what goes between two sentences: Japanese puts none after 。 */
+    sep: () => (cur === "ja" || cur === "zh" ? "" : " "),
     fieldLabel: f => I.t("profile." + f),
     optLabel: (f, o) => I.t("profile." + f + "." + o),
 
