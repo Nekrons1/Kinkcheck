@@ -20,11 +20,11 @@ const S = (title) => console.log("\n## " + title);
   ok(!p.errors.length, "no script errors on load: " + p.errors.join(" | "));
   const ids = [], codes = [];
   KC.CATS.forEach(c => c.items.forEach(([code, id]) => { ids.push(id); codes.push(code); }));
-  eq(ids.length, 467, "item count");
+  eq(ids.length, 477, "item count");
   eq(new Set(ids).size, ids.length, "unique ids"); eq(new Set(codes).size, codes.length, "unique codes");
   const byCode = {}; KC.CATS.forEach(c => c.items.forEach(([code, id]) => byCode[code] = id));
   eq(OLD.ORDER.map((id, i) => byCode[i]), OLD.ORDER, "codes 0..370 still mean the same items as in old versions");
-  eq(Object.keys(byCode).map(Number).sort((a, b) => a - b), [...Array(467).keys()], "codes are 0..466 with no gaps or reuse");
+  eq(Object.keys(byCode).map(Number).sort((a, b) => a - b), [...Array(477).keys()], "codes are 0..476 with no gaps or reuse");
   eq(["furry","xenophilia-tentacles","trampling-barefoot","trampling-shoes","rubber-band-snapping","forced-drinking-beer-cider","irrumatio-to-vomiting","bukkake","cum-in-eyes","nerd-hikikomori","humiliating-body-writing","wax-burns","spitting-in-mouth","snowballing","used-as-toy-for-other-sub","bondage-bag"].map(id => ids.indexOf(id) >= 0), Array(16).fill(true), "16 added items present");
   eq(["sleep-sacks", "bondage-bag", "scarification", "electricity-violet-wand"].map(id => KC.i18n.item(id, "ru").name), ["Спальный мешок", "Бондажный мешок", "Шрамирование", "Электро — вайолет-ванд"], "RU names as requested");
   eq(KC.CATS.find(c => c.id === "marking").items.some(([, id]) => id === "wax-burns"), true, "wax burns under marking");
@@ -65,7 +65,7 @@ const S = (title) => console.log("\n## " + title);
     eq(miss.length, 0, l + ": every item has name+hint (" + miss.slice(0, 3) + ")");
     const mc = KC.CATS.filter(c => !KC.i18n._pick("cats", c.id, l)); eq(mc.length, 0, l + ": every category named");
   });
-  const enNames = ids.map(id => KC.i18n.item(id, "en").name); eq(new Set(enNames).size, 467, "EN names unique");
+  const enNames = ids.map(id => KC.i18n.item(id, "en").name); eq(new Set(enNames).size, 477, "EN names unique");
   const enCyr = ids.filter(id => /[а-яё]/i.test(KC.i18n.item(id, "en").desc)); eq(enCyr, [], "EN hints contain no Cyrillic");
   // ui key parity
   const src = l => fs.readFileSync(require("./harness").ROOT + "/js/lang/" + l + ".ui.js", "utf8").match(/"([a-zA-Z0-9_.]+)":/g).map(s => s.slice(1, -2));
@@ -121,7 +121,7 @@ const S = (title) => console.log("\n## " + title);
   p = open("form", { navLang: "ru" });
   let { w, d } = p;
   eq(p.KC.i18n.lang, "ru", "RU browser -> RU page");
-  eq(d.querySelectorAll(".item").length, 467, "467 rows rendered");
+  eq(d.querySelectorAll(".item").length, 477, "477 rows rendered");
   ok(d.querySelector(".brand-row #langSw"), "language switcher sits in the title row");
   const dotted = [...d.querySelectorAll(".item .new-dot")].map(x => x.closest(".item").dataset.id).sort();
   const newer = []; p.KC.CATS.forEach(c => c.items.forEach(([code, id]) => { if (code >= 418) newer.push(id); }));
@@ -150,7 +150,7 @@ const S = (title) => console.log("\n## " + title);
   let saved = JSON.parse(w.localStorage.getItem("practices-checklist-v1"));
   eq(saved.items, { hugging: { interest: "love" }, "spanking-hand": { interest: "maybe" }, "fisting-anal": { interest: "limit" }, "impact-bruising": { interest: "yes" } }, "answers saved (toggle-off removed)");
   eq(saved.meta, { role: "sub", exp: "medium", rel: "poly", attire: ["lace", "leather"] }, "profile saved as keys");
-  eq(d.getElementById("progress").textContent, "Отмечено 4 из 467 практик", "progress text");
+  eq(d.getElementById("progress").textContent, "Отмечено 4 из 477 практик", "progress text");
   const link = p.KC.form.shareLink();
   ok(/[#&]lg=ru(&|$)/.test(link), "share link carries lg=ru");
   ok(/[#&]m=/.test(link), "share link carries profile (m=)");
@@ -172,7 +172,7 @@ const S = (title) => console.log("\n## " + title);
   ok(d.querySelector('#roleTop .opt[data-val="sub"]').getAttribute("aria-pressed") === "true", "role survived switch");
   eq(d.querySelector('#roleTop .opt[data-val="sub"]').textContent, "Submissive / Bottom", "role label translated");
   eq(d.getElementById("metaName").value, "Андрей", "name survived switch");
-  eq(d.getElementById("progress").textContent, "4 of 467 practices marked", "EN progress");
+  eq(d.getElementById("progress").textContent, "4 of 477 practices marked", "EN progress");
   eq(d.getElementById("shareBtn").textContent, "Share", "header translated");
   eq(d.documentElement.lang, "en", "<html lang> updated");
   ok(/lg=en/.test(p.KC.form.shareLink()), "link now carries lg=en");
@@ -185,7 +185,7 @@ const S = (title) => console.log("\n## " + title);
   ok(row("hugging").querySelector('.scale button[data-v="love"]').classList.contains("sel"), "answer survived switch to PT");
   eq(row("hugging").querySelector('.scale button[data-v="love"]').textContent, "Adoro", "PT scale");
   eq(d.querySelector('#roleTop .opt[data-val="sub"]').textContent, "Submisso(a) / Bottom", "PT role label");
-  eq(d.getElementById("progress").textContent, "4 de 467 práticas marcadas", "PT progress");
+  eq(d.getElementById("progress").textContent, "4 de 477 práticas marcadas", "PT progress");
   const ptHash = p.KC.form.shareLink().split("#")[1];
   ok(/lg=pt/.test(ptHash), "PT link carries lg=pt");
   eq(open("form", { hash: ptHash, storage: { local: { "checklist-lang": "ru" }, session: {} } }).KC.i18n.lang, "pt", "PT link opens in PT");
@@ -351,7 +351,7 @@ const S = (title) => console.log("\n## " + title);
   eq(Object.entries(gp.KC.form.state.items).filter(([id]) => ids.indexOf(id) >= 0).sort(), [["cbt", { interest: "limit" }], ["hugging", { interest: "love" }], ["knife-play", { interest: "maybe" }], ["orgy", { interest: "yes" }], ["puppy-play", { interest: "yes" }]], "old ids moved to current items; current answer wins");
   ok(gp.d.querySelector('.item[data-id="puppy-play"] .scale button[data-v="yes"]').classList.contains("sel"), "moved answer is visible on the page");
   const gShown = gp.d.querySelectorAll(".scale button.sel").length, gLink = Object.keys(KCn.codec.decode(gp.KC.form.shareLink()).items).length;
-  eq(gp.d.getElementById("progress").textContent, "Отмечено " + gShown + " из 467 практик", "counter = what is shown");
+  eq(gp.d.getElementById("progress").textContent, "Отмечено " + gShown + " из 477 практик", "counter = what is shown");
   eq(gLink, gShown, "link contains exactly what the counter says");
   Object.keys(KC.ID_ALIASES).forEach(k => { if (ids.indexOf(KC.ID_ALIASES[k]) < 0) ok(false, "alias target missing: " + k); });
 
@@ -381,7 +381,7 @@ const S = (title) => console.log("\n## " + title);
   const srt = o => Object.entries(o).sort();
   eq(srt(KCn.codec.decode(KCn.codec.encode(withNew)).items), srt(withNew.items), "link with new items round-trips");
   const allNew = {}; KCn.CATS.forEach(c => c.items.forEach(([, id], i) => allNew[id] = { interest: vals[i % 4] }));
-  eq(Object.keys(KCn.codec.decode(KCn.codec.encode({ items: allNew, meta: {} })).items).length, 467, "fully filled 467-item link round-trips");
+  eq(Object.keys(KCn.codec.decode(KCn.codec.encode({ items: allNew, meta: {} })).items).length, 477, "fully filled 477-item link round-trips");
 
   /* form: "Show" filter */
   S("Show filter");
@@ -390,7 +390,7 @@ const S = (title) => console.log("\n## " + title);
   const vsel = p.d.getElementById("view");
   eq([...vsel.options].map(o => o.textContent), ["Все пункты", "Только без ответа", "Только новые", "Отвеченные, по ответам", "Обожаю / Да / Может"], "Show menu labels");
   vsel.value = "unanswered"; vsel.dispatchEvent(new p.w.Event("change"));
-  eq([vis().length, vis().indexOf("hugging"), vis().indexOf("furry")], [465, -1, -1], "unanswered: answered items hidden");
+  eq([vis().length, vis().indexOf("hugging"), vis().indexOf("furry")], [475, -1, -1], "unanswered: answered items hidden");
   click(p.w, p.d.querySelector('.item[data-id="chains"] .scale button[data-v="yes"]'));
   ok(vis().indexOf("chains") >= 0, "a row just answered stays visible until the filter is re-applied");
   vsel.dispatchEvent(new p.w.Event("change")); ok(vis().indexOf("chains") < 0, "re-applying hides it");
@@ -399,7 +399,7 @@ const S = (title) => console.log("\n## " + title);
   eq(vis().sort(), newIds.sort(), "new: exactly the green-dot items (" + newIds.length + ")");
   const sb = p.d.getElementById("search"); sb.value = "секс"; sb.dispatchEvent(new p.w.Event("input"));
   ok(vis().length > 0 && vis().every(id => newIds.indexOf(id) >= 0), "search combines with the filter");
-  sb.value = ""; vsel.value = "all"; vsel.dispatchEvent(new p.w.Event("change")); eq(vis().length, 467, "all items again");
+  sb.value = ""; vsel.value = "all"; vsel.dispatchEvent(new p.w.Event("change")); eq(vis().length, 477, "all items again");
 
   /* backup */
   S("Backup");
@@ -673,7 +673,7 @@ const S = (title) => console.log("\n## " + title);
   eq(tp.d.querySelector('.item[data-id="blindfolds"] .main').textContent, "ผ้าปิดตา", "TH name");
   eq(tp.d.querySelector('.item[data-id="blindfolds"] .sub').textContent, "Blindfolds", "TH page shows English subtitle");
   eq(tp.d.querySelector('.item[data-id="hugging"] .scale button.sel').textContent, "ชอบมาก", "TH scale + answer");
-  eq(tp.d.getElementById("progress").textContent, "เลือกแล้ว 4 จาก 467 รายการ", "TH progress");
+  eq(tp.d.getElementById("progress").textContent, "เลือกแล้ว 4 จาก 477 รายการ", "TH progress");
   ok(/lg=th/.test(tp.KC.form.shareLink()), "TH link carries lg=th");
   eq(open("form", { hash: tp.KC.form.shareLink().split("#")[1], storage: { local: { "checklist-lang": "ru" }, session: {} } }).KC.i18n.lang, "th", "TH link opens in Thai");
   ok(/ลิมิตเด็ดขาด/.test(tp.KC.form.buildSheet().textContent), "TH PDF sheet");
@@ -685,7 +685,7 @@ const S = (title) => console.log("\n## " + title);
   eq(zp.d.querySelector('.item[data-id="blindfolds"] .main').textContent, "眼罩", "ZH name");
   eq(zp.d.querySelector('.item[data-id="blindfolds"] .sub').textContent, "Blindfolds", "ZH page shows English subtitle");
   eq(zp.d.querySelector('.item[data-id="hugging"] .scale button.sel').textContent, "超愛", "ZH scale + answer");
-  eq(zp.d.getElementById("progress").textContent, "已勾選 4／467 項", "ZH progress");
+  eq(zp.d.getElementById("progress").textContent, "已勾選 4／477 項", "ZH progress");
   ok(/lg=zh/.test(zp.KC.form.shareLink()), "ZH link carries lg=zh");
   eq(open("form", { hash: zp.KC.form.shareLink().split("#")[1], storage: { local: { "checklist-lang": "ru" }, session: {} } }).KC.i18n.lang, "zh", "ZH link opens in Chinese");
   ok(/硬限制/.test(zp.KC.form.buildSheet().textContent), "ZH PDF sheet");
@@ -697,7 +697,7 @@ const S = (title) => console.log("\n## " + title);
   eq(p.d.querySelector('.item[data-id="face-sitting"] .main').textContent, "顔面騎乗", "JA name");
   eq(p.d.querySelector('.item[data-id="face-sitting"] .sub').textContent, "Face-sitting", "JA page shows English subtitle");
   eq(p.d.querySelector('.item[data-id="hugging"] .scale button.sel').textContent, "大好き", "JA scale + answer");
-  eq(p.d.getElementById("progress").textContent, "467項目中 4項目にチェック済み", "JA progress");
+  eq(p.d.getElementById("progress").textContent, "477項目中 4項目にチェック済み", "JA progress");
   ok(/lg=ja/.test(p.KC.form.shareLink()), "JA link carries lg=ja");
   ok(/ハードリミット/.test(p.KC.form.buildSheet().textContent), "JA PDF sheet");
   const js = p.d.getElementById("search"); js.value = "鞭"; js.dispatchEvent(new p.w.Event("input"));
@@ -847,13 +847,13 @@ const S = (title) => console.log("\n## " + title);
   const tact = b3.d.getElementById("tplAct");
   eq(tact.textContent, "Показать все пункты", "note button: show all");
   click(b3.w, tact);
-  eq([visP(b3).length, tact.textContent, b3.d.getElementById("tplSel").value], [467, "Только пункты шаблона", ""], "show all: every item, button to go back");
+  eq([visP(b3).length, tact.textContent, b3.d.getElementById("tplSel").value], [477, "Только пункты шаблона", ""], "show all: every item, button to go back");
   ok(/создана по шаблону «Evening»\. Показаны все пункты\./.test(b3.d.getElementById("tplNoteText").textContent), "note still says what the list was created by");
   await sleep(300);
   eq(LS(b3, OK_).template.name, "Evening", "showing all does not unbind the list");
   click(b3.w, tact); eq(visP(b3).length, 5, "back to the template's items");
   const bsel = b3.d.getElementById("tplSel"); bsel.value = ""; bsel.dispatchEvent(new b3.w.Event("change"));
-  eq([visP(b3).length, b3.KC.form.state.template.name], [467, "Evening"], "“No template” in Filters: a view choice only");
+  eq([visP(b3).length, b3.KC.form.state.template.name], [477, "Evening"], "“No template” in Filters: a view choice only");
   bsel.value = td.tpl.id; bsel.dispatchEvent(new b3.w.Event("change"));
   const bl = b3.KC.form.shareLink(), bld = b3.KC.codec.decode(bl);
   eq([Object.keys(bld.items), bld.by && bld.by.id, bld.tpl], [["hugging"], td.tpl.id, undefined], "plain link of a list by a template: its answers + fi= mark");
@@ -875,7 +875,7 @@ const S = (title) => console.log("\n## " + title);
   const borisRow = [...b3.d.querySelectorAll("#mineList .saved-row")].find(r => !/по шаблону/.test(r.textContent));
   click(b3.w, borisRow.querySelector('[data-act="load"]'));
   b3 = open("form", { storage: b3.storage() });
-  eq([b3.KC.form.state.name, b3.KC.form.state.template, visP(b3).length], ["Boris", undefined, 467], "switched to my plain list");
+  eq([b3.KC.form.state.name, b3.KC.form.state.template, visP(b3).length], ["Boris", undefined, 477], "switched to my plain list");
   r3 = open("form", { hash: tplLink.split("#")[1], storage: b3.storage() });
   b3 = open("form", { storage: r3.storage() });
   eq([b3.KC.form.state.template.name, Object.keys(b3.KC.form.state.items).sort(), LS(b3, MK).length], ["Evening", ["chains", "hugging"], 2], "template link from another list: my list by it is reopened (not a new one)");
@@ -901,7 +901,7 @@ const S = (title) => console.log("\n## " + title);
   S("Templates: someone's list shown by my template");
   const bobPlain = KCn.codec.encode({ uid: "BOB002", name: "Bob", items: { hugging: { interest: "yes" }, "spanking-hand": { interest: "love" }, chains: { interest: "maybe" } }, meta: {} }, "ru");
   rv = open("form", { hash: bobPlain, storage: recStorage });
-  eq([rv.KC.form.sharedBy, rv.d.getElementById("tplNote").hidden, visP(rv).length], [null, true, 467], "plain list: no template, no note");
+  eq([rv.KC.form.sharedBy, rv.d.getElementById("tplNote").hidden, visP(rv).length], [null, true, 477], "plain list: no template, no note");
   click(rv.w, rv.d.getElementById("bannerTpl"));
   ok(!rv.d.getElementById("tplSel").hidden, "“Show by a template…” points at the template list in the header");
   const rsel = rv.d.getElementById("tplSel"); rsel.value = td.tpl.id; rsel.dispatchEvent(new rv.w.Event("change"));
@@ -917,7 +917,7 @@ const S = (title) => console.log("\n## " + title);
   click(dz.w, dz.d.querySelector('#savedTplList button[data-act="del"]'));
   eq([conf, LS(dz, TK).length], [1, 0], "deleting a template asks first");
   dz = open("form", { storage: dz.storage() });
-  eq([visP(dz).length, dz.d.getElementById("tplAct").hidden], [467, true], "list by a deleted template: opens with all items");
+  eq([visP(dz).length, dz.d.getElementById("tplAct").hidden], [477, true], "list by a deleted template: opens with all items");
   ok(/создана по шаблону «Evening», но этого шаблона больше нет среди сохранённых\. Показаны все пункты\./.test(dz.d.getElementById("tplNoteText").textContent), "…and still says what it was created by");
   click(dz.w, dz.d.getElementById("mineBtn"));
   ok(/по удалённому шаблону «Evening»/.test(dz.d.getElementById("mineList").textContent), "My lists: “by the deleted template”");
@@ -951,7 +951,7 @@ const S = (title) => console.log("\n## " + title);
   eq(KCn.codec.decode(emptyLink.replace(/&k=\w+/, "")).damaged, false, "…a link without checksum still opens");
   const bigSet = []; KCn.CATS.forEach(c => c.items.forEach(([, id]) => bigSet.push(id)));
   const bigL = KCn.codec.encode(Object.assign(KCn.store.blank(), { tpl: { id: "ABCDEF", name: "All", ids: bigSet } }), "ru"), bigD = KCn.codec.decode(bigL);
-  eq([bigD.tpl.ids.length, bigD.damaged], [467, false], "a template of every item round-trips (bitmap form)");
+  eq([bigD.tpl.ids.length, bigD.damaged], [477, false], "a template of every item round-trips (bitmap form)");
   ok(new URLSearchParams(bigL).get("t").length <= 90, "…in about 80 characters (grows 1 bit per item)");
 
   S("Templates: updates and own template");
@@ -1079,7 +1079,7 @@ const S = (title) => console.log("\n## " + title);
   eq([ts.hidden, ts.value, ts.options[ts.selectedIndex].textContent, ts.classList.contains("on")], [false, td.tpl.id, "Evening", true], "list by a template: the header list shows its name, highlighted");
   eq(ts.options[0].textContent, "✕ Без шаблона", "first option removes it");
   ts.value = ""; ts.dispatchEvent(new hq.w.Event("change"));
-  eq([visP(hq).length, ts.options[ts.selectedIndex].textContent, ts.classList.contains("on")], [467, "Шаблон…", false], "one pick: no template, the list says “Template…”");
+  eq([visP(hq).length, ts.options[ts.selectedIndex].textContent, ts.classList.contains("on")], [477, "Шаблон…", false], "one pick: no template, the list says “Template…”");
 
   S("v557: share the current template");
   hq = open("form", { storage: recStorage });
@@ -1243,6 +1243,55 @@ const S = (title) => console.log("\n## " + title);
     eq([tg.KC.form.viewingShared, tg.KC.form.state.name, tg.KC.store.received.list().length], [false, "Me", 0], "#toggle-goatcounter (exclude my own visits) opens my list, nothing added to Received");
     const junk = open("form", { hash: "top" });
     eq([junk.KC.form.viewingShared, junk.KC.store.received.list().length], [false, 0], "any other non-link #… is ignored too");
+  }
+
+  S("v568: 18+ and disclaimer on both pages");
+  ["form", "compare"].forEach(pgName => {
+    const lp = open(pgName, { storage: { local: { "checklist-lang": "ru" }, session: {} } }), el = lp.d.querySelector(".foot-legal");
+    ok(el && /подтверждаете, что вам исполнилось 18 лет/.test(el.textContent) && /Не является пропагандой упоминаемых практик; сервис носит развлекательный характер\./.test(el.textContent), pgName + ": 18+ line and disclaimer under the footer");
+    lp.KC.i18n.set("zh"); lp.KC.i18n.apply(lp.d); ok(/18 歲/.test(lp.d.querySelector(".foot-legal").textContent), pgName + ": translated (ZH)");
+  });
+
+  S("v569: damaged saved data never breaks a page");
+  {
+    const keys = ["practices-checklist-v1", "checklist-saved-profiles-v1", "checklist-my-profiles-v1", "checklist-templates-v1", "checklist-favs-v1", "checklist-compares-v1", "checklist-active-mine-id"];
+    const junk = ["{", "null", "42", "\"str\"", "{\"a\":1}", "[1,2,{}]", "[{\"id\":\"x\",\"data\":5,\"code\":7}]"];
+    const crashes = [];
+    keys.forEach(k => junk.forEach(j => ["form", "compare"].forEach(pgName => {
+      const p = open(pgName, { storage: { local: { [k]: j }, session: {} } });
+      if (pgName === "form") ["savedBtn", "mineBtn", "shareBtn", "pdfBtn"].forEach(id => click(p.w, p.d.getElementById(id)));
+      else { click(p.w, p.d.getElementById("addPart")); click(p.w, p.d.getElementById("cmpBtn")); }
+      if (p.errors.length) crashes.push(k + "=" + j + " " + pgName + ": " + p.errors[0]);
+    })));
+    eq(crashes, [], "both pages open (and their windows) with any damaged value in storage");
+  }
+
+  S("v570: 8 new practices, leather paddles renamed");
+  {
+    const K = open("form").KC, codeOf = {}, catOf = {}, next = {};
+    K.CATS.forEach(c => c.items.forEach(([code, id], i) => { codeOf[id] = code; catOf[id] = c.id; next[id] = (c.items[i + 1] || [])[1]; }));
+    const want = { rattan: 467, "hot-wax-high-temp": 468, "pressure-points": 469, "rough-grabbing": 470, "gentle-touch": 471, "leash-walk-outside": 472, "bottle-neck-vaginal": 473, "bottle-neck-anal": 474 };
+    eq(Object.keys(want).map(id => codeOf[id]), Object.values(want), "codes 467–474");
+    eq([next["caning-sensation"], next["hot-wax-dripping"], next["pain-massage"], next["hair-pulling"], next["hugging"], next["leash"], next["object-insertion"], next["bottle-neck-vaginal"]],
+      ["rattan", "hot-wax-high-temp", "pressure-points", "rough-grabbing", "gentle-touch", "leash-walk-outside", "bottle-neck-vaginal", "bottle-neck-anal"], "each placed next to its related item");
+    eq(K.i18n.item("rattan", "ru").name, "Ротанг", "RU: Ротанг");
+    ok(/законы|Законы/.test(K.i18n.item("leash-walk-outside", "ru").desc) && /стран/.test(K.i18n.item("leash-walk-outside", "ru").desc), "leash walk hint: laws and attitudes differ by country");
+    ["ru", "en", "pt", "es", "ja", "th", "zh"].forEach(l => eq(Object.keys(want).filter(id => { const it = K.i18n.item(id, l); return !it.name || !it.desc || (l !== "en" && it.desc === K.i18n.item(id, "en").desc); }), [], l + ": new items translated"));
+    eq([K.i18n.item("spanking-leather-slappers", "ru").name, K.i18n.item("spanking-leather-slappers", "en").name], ["Шлепки кожаными паддлами", "Spanking – leather paddles"], "leather slappers renamed to leather paddles (id kept)");
+    const dn = open("form", { storage: { local: { "checklist-lang": "ru" }, session: {} } }).d;
+    eq(Object.keys(want).filter(id => !dn.querySelector('.item[data-id="' + id + '"] .new-dot')), [], "all 8 marked as new (green dot)");
+  }
+
+  S("v571: other sub serves you; urinating in front of a partner");
+  {
+    const K = open("form").KC, codeOf = {}, next = {};
+    K.CATS.forEach(c => c.items.forEach(([code, id], i) => { codeOf[id] = code; next[id] = (c.items[i + 1] || [])[1]; }));
+    eq([codeOf["other-sub-serves-you"], codeOf["urination-in-front"]], [475, 476], "codes 475, 476");
+    eq([next["used-as-toy-for-other-sub"], next["urination-in-front"]], ["other-sub-serves-you", "golden-showers"], "placed next to related items");
+    eq([K.i18n.item("other-sub-serves-you", "ru").name, K.i18n.item("urination-in-front", "ru").name], ["Вас удовлетворяет другой сабмиссив по принуждению", "Мочеиспускание при партнёре / во время сессии"], "RU names");
+    ["ru", "en", "pt", "es", "ja", "th", "zh"].forEach(l => eq(["other-sub-serves-you", "urination-in-front"].filter(id => { const it = K.i18n.item(id, l); return !it.name || !it.desc || (l !== "en" && it.desc === K.i18n.item(id, "en").desc); }), [], l + ": translated"));
+    const dn = open("form", { storage: { local: { "checklist-lang": "ru" }, session: {} } }).d;
+    eq(["other-sub-serves-you", "urination-in-front"].filter(id => !dn.querySelector('.item[data-id="' + id + '"] .new-dot')), [], "green dots");
   }
 
   const R = report(); console.log("\nPASS", R.PASS, "FAIL", R.FAIL);

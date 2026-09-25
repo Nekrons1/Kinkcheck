@@ -10,6 +10,9 @@
   const VALID = { limit: 1, maybe: 1, yes: 1, love: 1 };
   const TID = /^[A-Za-z0-9]{6}$/;
   /* id of a saved entry: time + random part, so two entries made in the same millisecond never share an id */
+  /* a stored list: always an array of objects, whatever is in storage (damaged data never breaks a page) */
+  const arr = k => { const a = KC.ls.get(k, []); return Array.isArray(a) ? a.filter(x => x && typeof x === "object" && !Array.isArray(x)) : []; };
+  const recArr = () => arr(KC.KEYS.saved).filter(x => typeof x.code === "string");
   const newEntryId = p => p + Date.now() + Math.floor(Math.random() * 46656).toString(36);
 
   const S = KC.store = {
@@ -82,7 +85,7 @@
       /* also merges duplicates left by older versions: keeps the earliest entry,
          taking a custom name from a duplicate if the kept one has none */
       list() {
-        const a = KC.ls.get(KC.KEYS.saved, []) || [];
+        const a = recArr();
         const byKey = {}, out = [];
         a.slice().sort((x, y) => (x.ts || 0) - (y.ts || 0)).forEach(x => {
           if (x.manual) { out.push(x); return; } /* saved on purpose via "Save as": never merged */
@@ -135,14 +138,14 @@
     /* backup of everything on this device -> plain object (saved as a .json file) */
     exportAll() {
       return { app: "kinkcheck", v: 1, ts: Date.now(), own: KC.ls.get(KC.KEYS.state, null), active: S.mine.active(),
-        mine: S.mine.list(), received: KC.ls.get(KC.KEYS.saved, []) || [], templates: S.tpl.list(), favs: S.favs.all(), compares: S.cmp.list() };
+        mine: S.mine.list(), received: recArr(), templates: S.tpl.list(), favs: S.favs.all(), compares: S.cmp.list() };
     },
     /* merge a backup in: adds lists that are not here yet (by id), never deletes anything.
        -> {mine: added, received: added, templates: added} or null if it is not a backup.
        Backups made before templates/favourites existed simply lack those fields. */
     importAll(b) {
       if (!b || b.app !== "kinkcheck" || !Array.isArray(b.mine) || !Array.isArray(b.received)) return null;
-      const mine = S.mine.list(), rec = KC.ls.get(KC.KEYS.saved, []) || [];
+      const mine = S.mine.list(), rec = recArr();
       const mIds = {}, rIds = {}; mine.forEach(x => mIds[x.id] = 1); rec.forEach(x => rIds[x.id] = 1);
       let am = 0, ar = 0;
       b.mine.forEach(x => { if (x && x.id && x.data && !mIds[x.id]) { mine.push({ id: x.id, name: x.name || "", data: S.normalize(x.data), ts: x.ts || Date.now() }); am++; } });
@@ -189,7 +192,7 @@
        The own list is auto-saved into the "active" entry (KC.KEYS.active):
          key absent = never set (older version) | "" = new list not saved yet | id */
     mine: {
-      list()   { return KC.ls.get(KC.KEYS.mine, []) || []; },
+      list()   { return arr(KC.KEYS.mine); },
       write(a) { KC.ls.set(KC.KEYS.mine, a); },
       active()      { return KC.ls.raw(KC.KEYS.active); },
       setActive(id) { KC.ls.setRaw(KC.KEYS.active, id || ""); },
