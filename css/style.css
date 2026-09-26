@@ -542,3 +542,7 @@ html[lang="zh-Hant"] body{font-family:Inter,"PingFang TC","Microsoft JhengHei","
 
 /* 18+ and disclaimer under the footer, both pages */
 .foot-legal{margin:8px 0 0;color:var(--muted);font-size:12px;line-height:1.6}
+
+/* move to the new site (old build only): the bar sits at the very top of the page */
+.migrate-bar{margin-top:0;margin-bottom:14px;background:var(--accent-soft);border-color:var(--accent)}
+#mineMigrate[hidden]{display:none}

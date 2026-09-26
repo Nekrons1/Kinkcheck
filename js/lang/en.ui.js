@@ -291,4 +291,14 @@ KC.addLang("en", "ui", {
   "help.privacyStats_html": "<ul><li>The site counts visits anonymously with GoatCounter: which page is open, the language and actions such as “opened a link” or “downloaded a PDF”. No cookies, no IP addresses, nothing stored on your device. Answers, names and links are never sent.</li></ul>",
   /* v568: 18+ and disclaimer */
   "foot.legal": "18+. By using this site, you confirm that you are at least 18 years old. It does not promote the practices mentioned; the service is for entertainment purposes.",
+  /* v573: moving to the new site address */
+  "migrate.bar_html": "<b>The site has moved to a new address.</b> Move everything saved in this browser there with one tap: lists, received, templates, favourites and comparisons. Nothing is deleted here.",
+  "migrate.go": "Move to the new site",
+  "migrate.later": "Later",
+  "migrate.h": "Moving from the old site",
+  "migrate.ask": "Add the data from the old site here? Lists: {mine}, received: {rec}, templates: {tpl}, comparisons: {cmp}, plus favourites. What is already saved here stays.",
+  "migrate.yes": "Move",
+  "migrate.done": "Done! Moved — lists: {mine}, received: {rec}, templates: {tpl}, comparisons: {cmp}. Favourites are here too.",
+  "migrate.nothing": "All of this was already moved before — nothing new.",
+  "migrate.bad": "Couldn't read the moved data: the link is cut or damaged. Open the old site and tap “Move to the new site” again, or use a backup (“My lists” → “Download backup”).",
 });
