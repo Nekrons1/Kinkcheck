@@ -4,9 +4,10 @@
    a few event names below — never answers, names or links (those live after "#" and are not read here).
    CODE = the site code chosen at goatcounter.com ("" = counter off). If the counter script is blocked
    (ad blocker, no network), nothing happens and the site works as usual.
-   Events: open-link, open-template, share, pdf, compare-2, compare-3plus, compare-saved. */
+   Events: open-link, open-template, share, pdf, compare-2, compare-3plus, compare-saved, portrait, card, roulette, dnd, wod,
+   open-link-empty, open-link-damaged, share-send (v600). */
 (function (KC) {
-  const CODE = "nekrons1";
+  const CODE = "klevatess";
   /* where this file was loaded from -> the vendor copy next to it, same ?v= */
   const me = document.currentScript && document.currentScript.src;
   const SRC = me ? me.replace(/core\/stats\.js/, "vendor/goatcounter-count.js") : "js/vendor/goatcounter-count.js";

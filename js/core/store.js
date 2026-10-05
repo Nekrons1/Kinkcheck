@@ -5,7 +5,9 @@
                   template?:{id, name}             template this list was CREATED by (a reference by template id).
                                                    Opening the list applies that template while it exists in the
                                                    device's templates; if it was deleted, the list still says so
-                                                   but opens with all items. } */
+                                                   but opens with all items.
+                  ext?:1                           v613: an EXTENDED list — items:{id:{t, b, tw, bw}} (core/ext.js)
+                  pair?:uid                        v613: the list id of its plain / extended counterpart } */
 (function (KC) {
   const VALID = { limit: 1, maybe: 1, yes: 1, love: 1 };
   const TID = /^[A-Za-z0-9]{6}$/;
@@ -14,6 +16,8 @@
   const arr = k => { const a = KC.ls.get(k, []); return Array.isArray(a) ? a.filter(x => x && typeof x === "object" && !Array.isArray(x)) : []; };
   const recArr = () => arr(KC.KEYS.saved).filter(x => typeof x.code === "string");
   const newEntryId = p => p + Date.now() + Math.floor(Math.random() * 46656).toString(36);
+  /* a saved comparison part keeps a role chosen on the compare page only when it is Top or Bottom */
+  const roleOf = (p, r) => { if (r === "dom" || r === "sub") p.role = r; return p; };
 
   const S = KC.store = {
     newEntryId,
@@ -34,9 +38,15 @@
       if (typeof src.uid === "string" && /^[A-Za-z0-9_-]{6}$/.test(src.uid)) st.uid = src.uid;
       st.meta = KC.normalizeMeta(src.meta);
       const items = src.items || {}, AL = KC.ID_ALIASES || {};
+      if (src.ext) {   /* v613: an extended list (two roles per practice) */
+        st.ext = 1;
+        Object.keys(items).forEach(id => { const x = KC.ext.cleanItem(items[id]); if (!x) return; if (!AL[id]) st.items[id] = x; else if (!items[AL[id]]) st.items[AL[id]] = x; });
+      } else {
       Object.keys(items).forEach(id => { const v = items[id] && items[id].interest; if (VALID[v] && !AL[id]) st.items[id] = { interest: v }; });
       /* answers saved under ids of the earliest versions go to the current item (current answer wins) */
       Object.keys(items).forEach(id => { const v = items[id] && items[id].interest; const to = AL[id]; if (to && VALID[v] && !st.items[to]) st.items[to] = { interest: v }; });
+      }
+      if (typeof src.pair === "string" && /^[A-Za-z0-9_-]{6}$/.test(src.pair)) st.pair = src.pair;
       /* favourites and the template are kept only when present, so older states stay unchanged */
       if (Array.isArray(src.fav)) { const f = S.cleanIds(src.fav); if (f.length) st.fav = f; }
       const tp = S.cleanTpl(src.template); if (tp) st.template = tp;
@@ -65,7 +75,7 @@
     /* answered items in list order, optionally only those inside ids -> contents of a new template */
     answeredIds(st, ids) {
       const set = ids ? {} : null; if (ids) ids.forEach(id => { set[id] = 1; });
-      const out = []; KC.CATS.forEach(c => c.items.forEach(([, id]) => { if (st.items[id] && st.items[id].interest && (!set || set[id])) out.push(id); }));
+      const out = []; KC.CATS.forEach(c => c.items.forEach(([, id]) => { if (KC.ext.answered(st, id) && (!set || set[id])) out.push(id); }));
       return out;
     },
     clone: st => JSON.parse(JSON.stringify(st)),
@@ -200,7 +210,7 @@
         const cl = S.cmp.list(), cIds = {}; cl.forEach(x => { cIds[x.id] = x; });
         b.compares.forEach(x => {
           if (!x || !x.id || !Array.isArray(x.parts)) return;
-          const parts = x.parts.filter(p => p && typeof p.code === "string").map(p => ({ name: typeof p.name === "string" ? p.name : "", uid: typeof p.uid === "string" ? p.uid : "", code: p.code }));
+          const parts = x.parts.filter(p => p && typeof p.code === "string").map(p => roleOf({ name: typeof p.name === "string" ? p.name : "", uid: typeof p.uid === "string" ? p.uid : "", code: p.code }, p.role));
           if (parts.length < S.cmp.MIN) return;
           const cur = cIds[x.id];
           if (cur) { if (fresher(x, cur)) { cur.name = typeof x.name === "string" ? x.name : ""; cur.parts = parts; cur.ts = x.ts; ac++; } return; }
@@ -243,7 +253,13 @@
       own()      { return this.list().filter(x => x.own); },
       received() { return this.list().filter(x => !x.own); },
       label(x)   { return (x && (x.label || x.name)) || ""; },
-      byTid(tid) { const a = this.list(); return a.find(x => x.own && x.tid === tid) || a.find(x => x.tid === tid) || null; },
+      byTid(tid) { const a = this.list(); return a.find(x => x.own && x.tid === tid) || a.find(x => x.tid === tid) || this.starter(tid); },
+      /* v617: the starter templates (data/starters.js) — never stored, never renamed or deleted; the name in the page's
+         language (tpl.st.<key>), the Latin name for links (linkName), the note under the intro (tpl.stDesc.<key>) */
+      starters() {
+        return (KC.STARTERS || []).map(x => ({ id: "st-" + x.key, tid: x.tid, key: x.key, name: KC.i18n.t("tpl.st." + x.key), linkName: x.link, ids: x.ids.slice(), starter: true, own: false, ts: 0 }));
+      },
+      starter(tid) { return this.starters().find(x => x.tid === tid) || null; },
       /* the template to apply for a reference {id, name} (a list's template): {id, name, ids} or null when
          it is not among the device's templates (deleted, or never received here) */
       resolve(ref) { const x = ref && this.byTid(ref.id); return x ? this.use(x) : null; },
@@ -266,6 +282,7 @@
       /* template opened from a link -> {status: added | exists | updated | own | none, item} */
       addReceived(tid, name, ids) {
         if (!TID.test(tid || "") || !ids.length) return { status: "none" };
+        const st = this.starter(tid); if (st) return { status: "exists", item: st };   /* v617: a starter template is always here */
         const a = this.list(), mine = a.find(x => x.own && x.tid === tid);
         if (mine) return { status: "own", item: mine };
         const i = a.findIndex(x => !x.own && x.tid === tid);
@@ -283,7 +300,8 @@
        A part points at a list by its list id (uid), so opening the comparison takes the newest version
        on this device: my current list, "My lists", then "Received" (a newer link from the same person
        replaces the old one there). code = the version last seen, used when the list is gone from the device;
-       name = the name typed on the compare page ("" = the name inside the list). */
+       name = the name typed on the compare page ("" = the name inside the list);
+       role = "dom" | "sub" chosen on the compare page (absent = the role inside the list). */
     cmp: {
       MIN: 3,
       list()   { const a = KC.ls.get(KC.KEYS.cmp, []); return Array.isArray(a) ? a.filter(x => x && x.id && Array.isArray(x.parts)) : []; },
@@ -306,7 +324,7 @@
           const f = this.fresh(p.uid);
           const state = !p.uid ? "same" : !f ? "gone" : f === p.code ? "same" : "updated";
           if (f) p.code = f;
-          return { name: p.name || "", code: p.code || "", uid: p.uid || "", state };
+          return roleOf({ name: p.name || "", code: p.code || "", uid: p.uid || "", state }, p.role);
         });
         this.write(a);
         return out;
@@ -314,7 +332,7 @@
       /* parts: [{name, code}] -> {status: added|updated, item}; the same name updates that comparison */
       save(name, parts, id) {
         const a = this.list(), nm = (name || "").trim();
-        const ps = parts.map(p => ({ name: (p.name || "").trim(), uid: (KC.codec.decode(p.code).uid || ""), code: p.code }));
+        const ps = parts.map(p => roleOf({ name: (p.name || "").trim(), uid: (KC.codec.decode(p.code).uid || ""), code: p.code }, p.role));
         const i = a.findIndex(x => (id && x.id === id && (x.name || "") === nm) || (nm && (x.name || "").trim().toLowerCase() === nm.toLowerCase()));
         if (i >= 0) { const it = a.splice(i, 1)[0]; it.name = nm; it.parts = ps; it.ts = Date.now(); a.unshift(it); this.write(a); return { status: "updated", item: it }; }
         const item = { id: newEntryId("c"), name: nm, parts: ps, ts: Date.now() };

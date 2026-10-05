@@ -14,7 +14,10 @@
     /* "only favourites and limits" (PDF window, off by default) wins over the ♥ toggle; favourites stay in it
        even without an answer — they are wishes */
     const favLim = KC.$("pdfFavLimits").checked, onlyFav = !favLim && KC.$("onlyFav").checked;
-    const isLimit = id => (st.items[id] || {}).interest === "limit";
+    /* v613: an extended list — a practice shows both roles ("↑ Да ✦ / ↓ Может"); a stop in either role is a limit */
+    const ext = KC.ext.isExt(st), RK = KC.match.RANK;
+    const vals = id => { const x = st.items[id] || {}; return ext ? KC.ext.R.map(r => x[r]).filter(Boolean) : x.interest ? [x.interest] : []; };
+    const isLimit = id => vals(id).indexOf("limit") >= 0;
     const inScope = id => (!set || set[id]) && (favLim ? !!favs[id] || isLimit(id) : (!onlyFav || favs[id]));
     const heart = id => favs[id] ? '<span style="color:' + P.accent + ';">♥</span> ' : "";
     const w = document.createElement("div");
@@ -29,6 +32,7 @@
       const txt = (Array.isArray(v) ? v : [v]).map(o => KC.i18n.optLabel(f.id, o)).join(", ");
       metaLine.push(esc(KC.i18n.fieldLabel(f.id)) + ": " + esc(txt));
     });
+    if (ext) metaLine.unshift(esc(t("ext.note")));
     const idbits = [];
     if (st.name) idbits.push(esc(t("pdf.name")) + ": <b>" + esc(st.name) + "</b>");
     if (st.safeword) idbits.push(esc(t("pdf.safeword")) + ": <b>" + esc(st.safeword) + "</b>");
@@ -44,11 +48,11 @@
     html += '<div style="margin-top:12px;">' + ["love", "yes", "maybe", "limit"].map(pill).join("&nbsp;") + "</div></div>";
 
     const limits = [];
-    KC.CATS.forEach(c => c.items.forEach(([, id]) => { if (inScope(id) && (st.items[id] || {}).interest === "limit") limits.push(id); }));
+    KC.CATS.forEach(c => c.items.forEach(([, id]) => { if (inScope(id) && isLimit(id)) limits.push(id); }));
     if (limits.length) {
       html += '<div style="background:' + PILL.limit[0] + ';border:1px solid #d7a3a3;border-radius:12px;padding:14px 18px;margin-bottom:14px;">'
         + '<div style="' + serif + 'font-size:16px;color:#a12b2b;margin-bottom:6px;">' + esc(t("pdf.limits")) + "</div>"
-        + '<div style="font-size:13px;color:#5a2a2a;line-height:1.7;">' + limits.map(id => esc(KC.i18n.item(id).name)).join("&nbsp;·&nbsp;") + "</div></div>";
+        + '<div style="font-size:13px;color:#5a2a2a;line-height:1.7;">' + limits.map(id => esc(KC.i18n.item(id).name) + (ext ? " " + KC.ext.R.filter(r => (st.items[id] || {})[r] === "limit").map(r => t("ext.arrow." + r)).join("") : "")).join("&nbsp;·&nbsp;") + "</div></div>";
     }
 
     /* favourites at a glance (not needed when the sheet shows only favourites) */
@@ -63,7 +67,7 @@
       let rows = cat.items.map(([, id]) => id).filter(inScope);
       if (st.onlyMarked !== false) rows = rows.filter(id => st.items[id] || (favLim && favs[id]));
       if (!rows.length) return; any = true;
-      const rank = id => { const s = st.items[id]; return s ? KC.match.RANK[s.interest] : 4; };
+      const rank = id => { const v = vals(id); return v.length ? Math.min.apply(null, v.map(x => RK[x])) : 4; };
       rows.sort((a, b) => rank(a) - rank(b));
       html += '<div style="' + card + '"><div style="border-bottom:2px solid ' + P.accent + ';padding-bottom:5px;margin-bottom:8px;"><span style="' + serif + 'font-size:19px;">' + esc(KC.i18n.cat(cat.id)) + "</span>"
         + (sub ? ' <span style="font-size:12px;color:' + P.muted + ';">' + esc(KC.i18n.cat(cat.id, "en")) + "</span>" : "")
@@ -72,7 +76,8 @@
       rows.forEach((id, i) => {
         const s = st.items[id], bb = i < rows.length - 1 ? "border-bottom:1px solid " + P.line + ";" : "";
         html += '<tr><td style="padding:6px 8px 6px 0;' + bb + 'vertical-align:middle;word-wrap:break-word;">' + nameOf(id) + "</td>"
-          + '<td style="padding:6px 0 6px 8px;' + bb + 'vertical-align:middle;width:96px;">' + (s ? pill(s.interest) : '<span style="color:#c3bbbf;">—</span>') + "</td></tr>";
+          + '<td style="padding:6px 0 6px 8px;' + bb + 'vertical-align:middle;width:' + (ext ? 150 : 96) + 'px;">' + (!s ? '<span style="color:#c3bbbf;">—</span>' : !ext ? pill(s.interest)
+            : KC.ext.R.filter(r => s[r]).map(r => '<span style="color:' + P.muted + ';font-size:12px;">' + esc(t("ext.arrow." + r)) + "</span> " + pill(s[r]) + (s[r + "w"] ? ' <span style="color:' + P.accent + ';font-weight:600;font-size:12px;">✦</span>' : "")).join("<br>")) + "</td></tr>";
       });
       html += "</table></div>";
     });
@@ -97,6 +102,7 @@
   }
   KC.$("pdfBtn").addEventListener("click", () => {
     KC.$("pdfFavLimits").checked = false; /* off every time the window opens */
+    KC.$("pdfPortrait").checked = false;
     pdfScope();
     pdfModal.open();
   });
@@ -104,26 +110,32 @@
   KC.$("pdfGo").addEventListener("click", async function () {
     const btn = this, old = btn.textContent; btn.disabled = true; btn.textContent = t("pdf.busy");
     KC.stats.event("pdf");
-    const sheet = F.buildSheet(); document.body.appendChild(sheet);
+    /* "Add the portrait as the first page" (off every time the window opens): its own page(s) before the list */
+    const sheets = (KC.$("pdfPortrait").checked && F.buildPortraitSheet ? [].concat(F.buildPortraitSheet()) : []).concat([F.buildSheet()]);
+    const sheet = sheets[sheets.length - 1];
+    sheets.forEach(sh => document.body.appendChild(sh));
     try {
       if (document.fonts && document.fonts.ready) { try { await document.fonts.ready; } catch (e) {} }
-      const canvas = await html2canvas(sheet, { scale: 2, backgroundColor: "#ffffff", useCORS: true, windowWidth: sheet.scrollWidth });
       const pdf = new window.jspdf.jsPDF("p", "pt", "a4");
-      const pw = pdf.internal.pageSize.getWidth(), ph = pdf.internal.pageSize.getHeight();
-      const margin = 24, imgW = pw - margin * 2, ratio = imgW / canvas.width, sliceH = Math.floor((ph - margin * 2) / ratio);
-      for (let y = 0, page = 0; y < canvas.height; page++) {
-        const h = Math.min(sliceH, canvas.height - y);
-        const c = document.createElement("canvas"); c.width = canvas.width; c.height = h;
-        const ctx = c.getContext("2d"); ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, c.width, h);
-        ctx.drawImage(canvas, 0, y, canvas.width, h, 0, 0, canvas.width, h);
-        if (page > 0) pdf.addPage();
-        pdf.addImage(c.toDataURL("image/jpeg", 0.92), "JPEG", margin, margin, imgW, h * ratio);
-        y += h;
+      const pw = pdf.internal.pageSize.getWidth(), ph = pdf.internal.pageSize.getHeight(), margin = 24, imgW = pw - margin * 2;
+      let page = 0;
+      for (const sh of sheets) {
+        const canvas = await html2canvas(sh, { scale: 2, backgroundColor: "#ffffff", useCORS: true, windowWidth: sh.scrollWidth });
+        const ratio = imgW / canvas.width, sliceH = Math.floor((ph - margin * 2) / ratio);
+        for (let y = 0; y < canvas.height; page++) {
+          const h = Math.min(sliceH, canvas.height - y);
+          const c = document.createElement("canvas"); c.width = canvas.width; c.height = h;
+          const ctx = c.getContext("2d"); ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, c.width, h);
+          ctx.drawImage(canvas, 0, y, canvas.width, h, 0, 0, canvas.width, h);
+          if (page > 0) pdf.addPage();
+          pdf.addImage(c.toDataURL("image/jpeg", 0.92), "JPEG", margin, margin, imgW, h * ratio);
+          y += h;
+        }
       }
       const fn = t("pdf.file") + (F.state.name ? "-" + F.state.name.replace(/\s+/g, "_") : "") + ".pdf";
       try { pdf.save(fn); } catch (e) { window.open(URL.createObjectURL(pdf.output("blob")), "_blank"); }
       KC.toast(t("toast.pdfReady"));
     } catch (err) { console.error(err); KC.toast(t("toast.pdfFail")); }
-    finally { document.body.removeChild(sheet); btn.disabled = false; btn.textContent = old; pdfModal.close(); }
+    finally { sheets.forEach(sh => { if (sh.parentNode) sh.parentNode.removeChild(sh); }); btn.disabled = false; btn.textContent = old; pdfModal.close(); }
   });
 })(window.KC);
